@@ -122,7 +122,7 @@ export const deposit = async ({
 /**
  * Initiates a withdrawal transaction.
  * @param amount The amount to withdraw
- * @param currency The currency code (e.g., 'USDC', 'ETH')
+ * @param tokenName The token name to withdraw (e.g. 'USDC', 'ETH')
  * @returns Promise that resolves with the transaction hash
  */
 export const withdraw = async ({ amount, tokenName }: WithdrawData): Promise<WithdrawResponse> => {
@@ -147,7 +147,7 @@ export const withdraw = async ({ amount, tokenName }: WithdrawData): Promise<Wit
  * @param functionName The name of the function to call
  * @param functionParams The parameters to pass to the function
  * @param chainId The chain id to use
- * @param value The amount of native currency to send with the transaction
+ * @param value The amount of native tokens to send with the transaction
  * @param permits Optional array of Permit2 permits for gasless token approvals
  * @param contractStandard The contract standard if any (e.g. ERC20, ERC721, etc.)
  * @returns Promise that resolves with the transaction hash
