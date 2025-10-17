@@ -15,6 +15,12 @@ export type {
   WithdrawMessage,
   CallSmartContractMessage,
 
+  // Action data types
+  AuthenticateData,
+  DepositData,
+  WithdrawData,
+  CallSmartContractData,
+
   // App to WebView response types
   AuthenticateResponse,
   DepositResponse,
