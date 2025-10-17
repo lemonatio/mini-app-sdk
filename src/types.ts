@@ -219,14 +219,17 @@ export enum ChainId {
 
   // Testnet
   ARBITRUM_SEPOLIA = 421614,
+  BASE_SEPOLIA = 84532,
   ETH_HOODI = 560048,
   ETH_SEPOLIA = 11155111,
+  OPTIMISM_SEPOLIA = 11155420,
   POLYGON_AMOY = 80002,
 }
 
 export enum TokenName {
   ETH = 'ETH',
   POL = 'POL',
+  DAI = 'DAI',
   USDC = 'USDC',
   USDT = 'USDT',
 }
