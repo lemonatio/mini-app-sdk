@@ -6,7 +6,8 @@
   },
   "npm": {
     "publish": true,
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "plugins": {
     "@release-it/conventional-changelog": {
