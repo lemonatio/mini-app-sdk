@@ -1,4 +1,5 @@
 /node_modules
+/assets
 /src
 /test
 /.cursor
