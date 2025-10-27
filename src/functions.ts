@@ -46,7 +46,14 @@ const sendMessageToApp = <T extends WebViewMessage>(message: T): void => {
 
   // Needs to double check the window.ReactNativeWebView is available to avoid undefined errors
   if (typeof window !== 'undefined' && window.ReactNativeWebView) {
-    window.ReactNativeWebView.postMessage(JSON.stringify(message));
+    // Stringify the message. Convert BigInt to string to avoid precision loss.
+    const stringifiedMessage = JSON.stringify(message, (_key, value) => {
+      if (typeof value === 'bigint') {
+        return value.toString();
+      }
+      return value as unknown;
+    });
+    window.ReactNativeWebView.postMessage(stringifiedMessage);
   }
 };
 
