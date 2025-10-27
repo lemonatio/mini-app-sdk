@@ -1,5 +1,12 @@
 
 
+## [0.1.4](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.3...v0.1.4) (2025-10-27)
+
+
+### Bug Fixes
+
+* export contract standard enum ([d4ce11f](https://github.com/lemonatio/mini-app-sdk/commit/d4ce11f85d981e9c684824389f9a18f4279aad4e))
+
 ## [0.1.3](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.1...v0.1.3) (2025-10-22)
 
 ## 0.1.1 (2025-10-17)
