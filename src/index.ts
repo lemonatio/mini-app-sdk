@@ -32,4 +32,11 @@ export type {
 } from './types';
 
 // Enums
-export { WebViewAction, ActionResponse, ChainId, TransactionResult, TokenName } from './types';
+export {
+  WebViewAction,
+  ActionResponse,
+  ChainId,
+  TransactionResult,
+  TokenName,
+  ContractStandard,
+} from './types';
