@@ -1,6 +1,6 @@
 {
   "name": "@lemoncash/mini-app-sdk",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "SDK for Lemon Mini App",
   "publishConfig": {
     "access": "public"
