@@ -1,5 +1,12 @@
 
 
+## [0.1.5](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.4...v0.1.5) (2025-10-29)
+
+
+### Features
+
+* safe stringify messages ([#13](https://github.com/lemonatio/mini-app-sdk/issues/13)) ([2cb27e2](https://github.com/lemonatio/mini-app-sdk/commit/2cb27e2f40ed202663970faf1ddb4d10d0f75283))
+
 ## [0.1.4](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.3...v0.1.4) (2025-10-27)
 
 
