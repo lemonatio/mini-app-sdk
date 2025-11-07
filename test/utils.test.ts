@@ -151,5 +151,44 @@ describe('Utils', () => {
       };
       expect(parsed).toEqual({ nullValue: null, undefinedValue: undefined, bigint: '1000' });
     });
+
+    it('should preserve titleValues and descriptionValues Record<string, string>', () => {
+      const message = {
+        action: WebViewAction.CALL_SMART_CONTRACT,
+        data: {
+          contractAddress: '0x1234567890123456789012345678901234567890' as const,
+          functionName: 'swap',
+          functionParams: [1000n, 2000n],
+          titleValues: {
+            amount: '100',
+            token: 'USDC',
+            fromToken: 'ETH',
+          },
+          descriptionValues: {
+            toToken: 'USDC',
+            rate: '1.5',
+          },
+          chainId: ChainId.POLYGON,
+        },
+      };
+
+      const result = stringifyMessage(message);
+      const parsed = JSON.parse(result) as CallSmartContractMessage;
+
+      // Verify titleValues and descriptionValues are preserved
+      expect(parsed.data.titleValues).toEqual({
+        amount: '100',
+        token: 'USDC',
+        fromToken: 'ETH',
+      });
+      expect(parsed.data.descriptionValues).toEqual({
+        toToken: 'USDC',
+        rate: '1.5',
+      });
+
+      // Verify BigInt values are still converted
+      expect(parsed.data.functionParams[0]).toBe('1000');
+      expect(parsed.data.functionParams[1]).toBe('2000');
+    });
   });
 });

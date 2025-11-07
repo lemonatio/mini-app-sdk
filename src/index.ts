@@ -3,11 +3,14 @@ export { deposit, withdraw, callSmartContract, authenticate, isWebView } from '.
 
 // Types
 export type {
-  MiniAppError,
+  // Utility types
+  Address,
+  Hex,
 
   // Base message interfaces
   WebViewMessage,
   AppMessage,
+  MiniAppError,
 
   // WebView to App message types
   AuthenticateMessage,

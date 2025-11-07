@@ -84,13 +84,15 @@ export type Permit = {
   spender: Address;
   amount: string;
   deadline: string; // Unix timestamp (in seconds)
-  nonce?: string;
+  nonce: string;
 };
 
 export type CallSmartContractData = {
   contractAddress: Address;
   functionName: string;
   functionParams: unknown[];
+  titleValues?: Record<string, string>;
+  descriptionValues?: Record<string, string>;
   value?: string;
   contractStandard?: ContractStandard;
   chainId?: ChainId;

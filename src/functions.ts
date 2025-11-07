@@ -147,6 +147,8 @@ export const withdraw = async ({ amount, tokenName }: WithdrawData): Promise<Wit
  * @param contractAddress The address of the smart contract
  * @param functionName The name of the function to call
  * @param functionParams The parameters to pass to the function
+ * @param titleValues The values to replace in the title
+ * @param descriptionValues The values to replace in the description
  * @param chainId The chain id to use
  * @param value The amount of native tokens to send with the transaction
  * @param permits Optional array of Permit2 permits for gasless token approvals
@@ -157,6 +159,8 @@ export const callSmartContract = async ({
   contractAddress,
   functionName,
   functionParams = [],
+  titleValues,
+  descriptionValues,
   chainId,
   value = '0',
   permits,
@@ -167,6 +171,8 @@ export const callSmartContract = async ({
     data: {
       contractAddress,
       functionName,
+      titleValues,
+      descriptionValues,
       functionParams,
       chainId,
       value,
