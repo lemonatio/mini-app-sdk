@@ -215,7 +215,9 @@ export enum ChainId {
   // Mainnet
   ARBITRUM_ONE = 42161,
   BASE = 8453,
+  CELO = 42220,
   ETH = 1,
+  GNOSIS = 100,
   OP_MAINNET = 10,
   POLYGON = 137,
 
