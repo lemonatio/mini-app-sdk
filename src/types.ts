@@ -75,7 +75,7 @@ export type WithdrawData = {
 
 export type CallSmartContractMessage = WebViewMessage & {
   action: WebViewAction.CALL_SMART_CONTRACT;
-  data: CallSmartContractData;
+  data: CallSmartContractData[];
 };
 
 export type Permit = {

@@ -143,36 +143,34 @@ export const withdraw = async ({ amount, tokenName }: WithdrawData): Promise<Wit
 };
 
 /**
- * Calls a smart contract function.
- * @param contractAddress The address of the smart contract
- * @param functionName The name of the function to call
- * @param functionParams The parameters to pass to the function
- * @param chainId The chain id to use
- * @param value The amount of native tokens to send with the transaction
- * @param permits Optional array of Permit2 permits for gasless token approvals
- * @param contractStandard The contract standard if any (e.g. ERC20, ERC721, etc.)
+ * Calls a smart contract function or multiple smart contract functions.
+ * @param contracts Array of smart contract call objects, each containing:
+ * @param contracts[].contractAddress The address of the smart contract
+ * @param contracts[].functionName The name of the function to call
+ * @param contracts[].functionParams The parameters to pass to the function
+ * @param contracts[].chainId The chain id to use
+ * @param contracts[].value The amount of native tokens to send with the transaction
+ * @param contracts[].permits Optional array of Permit2 permits for gasless token approvals
+ * @param contracts[].contractStandard The contract standard if any (e.g. ERC20, ERC721, etc.)
  * @returns Promise that resolves with the transaction hash
  */
-export const callSmartContract = async ({
-  contractAddress,
-  functionName,
-  functionParams = [],
-  chainId,
-  value = '0',
-  permits,
-  contractStandard,
-}: CallSmartContractData): Promise<CallSmartContractResponse> => {
+export const callSmartContract = async (
+  contracts: CallSmartContractData | CallSmartContractData[]
+): Promise<CallSmartContractResponse> => {
+  // Always convert to array to avoid errors
+  const contractsArray = Array.isArray(contracts) ? contracts : [contracts];
+
   const message: CallSmartContractMessage = {
     action: WebViewAction.CALL_SMART_CONTRACT,
-    data: {
-      contractAddress,
-      functionName,
-      functionParams,
-      chainId,
-      value,
-      permits,
-      contractStandard,
-    },
+    data: contractsArray.map((contract: CallSmartContractData) => ({
+      contractAddress: contract.contractAddress,
+      functionName: contract.functionName,
+      functionParams: contract.functionParams,
+      chainId: contract.chainId,
+      value: contract.value ?? '0',
+      permits: contract.permits,
+      contractStandard: contract.contractStandard,
+    })),
   };
 
   sendMessageToApp(message);
