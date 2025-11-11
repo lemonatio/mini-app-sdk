@@ -155,22 +155,11 @@ export const withdraw = async ({ amount, tokenName }: WithdrawData): Promise<Wit
  * @returns Promise that resolves with the transaction hash
  */
 export const callSmartContract = async (
-  contracts: CallSmartContractData | CallSmartContractData[]
+  contracts: CallSmartContractData[]
 ): Promise<CallSmartContractResponse> => {
-  // Always convert to array to avoid errors
-  const contractsArray = Array.isArray(contracts) ? contracts : [contracts];
-
   const message: CallSmartContractMessage = {
     action: WebViewAction.CALL_SMART_CONTRACT,
-    data: contractsArray.map((contract: CallSmartContractData) => ({
-      contractAddress: contract.contractAddress,
-      functionName: contract.functionName,
-      functionParams: contract.functionParams,
-      chainId: contract.chainId,
-      value: contract.value ?? '0',
-      permits: contract.permits,
-      contractStandard: contract.contractStandard,
-    })),
+    data: contracts,
   };
 
   sendMessageToApp(message);
