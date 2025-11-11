@@ -1,5 +1,5 @@
 import { stringifyMessage, convertToString } from '../src/utils';
-import { WebViewAction, ChainId, ContractStandard, CallSmartContractMessage } from '../src/types';
+import { WebViewAction, ChainId, ContractStandard } from '../src/types';
 
 describe('Utils', () => {
   describe('convertToString', () => {
@@ -107,7 +107,18 @@ describe('Utils', () => {
       };
 
       const result = stringifyMessage(testMessage);
-      const parsed = JSON.parse(result) as CallSmartContractMessage;
+      const parsed = JSON.parse(result) as {
+        action: string;
+        data: {
+          contractAddress: string;
+          functionName: string;
+          functionParams: unknown[];
+          value: string;
+          contractStandard: string;
+          chainId: number;
+          permits: unknown[];
+        };
+      };
 
       // Verify the structure is preserved
       expect(parsed.action).toBe('CALL_SMART_CONTRACT');
@@ -115,13 +126,18 @@ describe('Utils', () => {
       expect(parsed.data.functionName).toBe('transfer');
 
       // Verify BigInt values are converted to strings
-      expect(parsed.data.functionParams[1]).toBe('1000'); // 1000n -> '1000'
-      expect(parsed.data.functionParams[3]).toEqual(['1', '2', '3']); // [1n, 2n, 3n] -> ['1', '2', '3']
-      expect(parsed.data.functionParams[4]).toEqual([
+      expect(parsed.data.functionParams[1] as string).toBe('1000'); // 1000n -> '1000'
+      expect(parsed.data.functionParams[3] as string[]).toEqual(['1', '2', '3']); // [1n, 2n, 3n] -> ['1', '2', '3']
+      expect(parsed.data.functionParams[4] as (string | string[])[]).toEqual([
         ['nested', 'array'],
         ['4', '5'],
       ]); // nested arrays
-      expect(parsed.data.functionParams[5]).toEqual({
+      expect(
+        parsed.data.functionParams[5] as {
+          amount: string;
+          nested: { value: string; array: string[] };
+        }
+      ).toEqual({
         amount: '500',
         nested: {
           value: '1000',

@@ -378,24 +378,28 @@ describe('Core SDK Functions', () => {
         }
       });
 
-      const contractPromise = callSmartContract({
-        contractAddress: '0xContract...',
-        functionName: 'transfer',
-        functionParams: ['0xRecipient...', '1000000000000000000'],
-        chainId: ChainId.POLYGON_AMOY,
-        value: '0.001',
-      });
+      const contractPromise = callSmartContract([
+        {
+          contractAddress: '0xContract...',
+          functionName: 'transfer',
+          functionParams: ['0xRecipient...', '1000000000000000000'],
+          chainId: ChainId.POLYGON_AMOY,
+          value: '0.001',
+        },
+      ]);
 
       expect(mockPostMessage).toHaveBeenCalledWith(
         JSON.stringify({
           action: WebViewAction.CALL_SMART_CONTRACT,
-          data: {
-            contractAddress: '0xContract...',
-            functionName: 'transfer',
-            functionParams: ['0xRecipient...', '1000000000000000000'],
-            chainId: ChainId.POLYGON_AMOY,
-            value: '0.001',
-          },
+          data: [
+            {
+              contractAddress: '0xContract...',
+              functionName: 'transfer',
+              functionParams: ['0xRecipient...', '1000000000000000000'],
+              chainId: ChainId.POLYGON_AMOY,
+              value: '0.001',
+            },
+          ],
         })
       );
 
@@ -428,24 +432,28 @@ describe('Core SDK Functions', () => {
         }
       });
 
-      const contractPromise = callSmartContract({
-        contractAddress: '0xContract...',
-        functionName: 'drip',
-        functionParams: [],
-        chainId: ChainId.POLYGON_AMOY,
-        value: '0',
-      });
+      const contractPromise = callSmartContract([
+        {
+          contractAddress: '0xContract...',
+          functionName: 'drip',
+          functionParams: [],
+          chainId: ChainId.POLYGON_AMOY,
+          value: '0',
+        },
+      ]);
 
       expect(mockPostMessage).toHaveBeenCalledWith(
         JSON.stringify({
           action: WebViewAction.CALL_SMART_CONTRACT,
-          data: {
-            contractAddress: '0xContract...',
-            functionName: 'drip',
-            functionParams: [],
-            chainId: ChainId.POLYGON_AMOY,
-            value: '0',
-          },
+          data: [
+            {
+              contractAddress: '0xContract...',
+              functionName: 'drip',
+              functionParams: [],
+              chainId: ChainId.POLYGON_AMOY,
+              value: '0',
+            },
+          ],
         })
       );
 
@@ -466,13 +474,15 @@ describe('Core SDK Functions', () => {
       setupWebViewEnvironment(false);
 
       await expect(
-        callSmartContract({
-          contractAddress: '0xContract...',
-          functionName: 'drip',
-          functionParams: [],
-          chainId: ChainId.POLYGON_AMOY,
-          value: '0',
-        })
+        callSmartContract([
+          {
+            contractAddress: '0xContract...',
+            functionName: 'drip',
+            functionParams: [],
+            chainId: ChainId.POLYGON_AMOY,
+            value: '0',
+          },
+        ])
       ).rejects.toThrow('CALL_SMART_CONTRACT can only be used inside a React Native WebView');
     });
 
@@ -494,24 +504,28 @@ describe('Core SDK Functions', () => {
 
       const complexParams = ['0xAddress...', 12345, true, ['nested', 'array'], { key: 'value' }];
 
-      const contractPromise = callSmartContract({
-        contractAddress: '0xComplexContract...',
-        functionName: 'complexFunction',
-        functionParams: complexParams,
-        chainId: ChainId.POLYGON_AMOY,
-        value: '0.1',
-      });
+      const contractPromise = callSmartContract([
+        {
+          contractAddress: '0xComplexContract...',
+          functionName: 'complexFunction',
+          functionParams: complexParams,
+          chainId: ChainId.POLYGON_AMOY,
+          value: '0.1',
+        },
+      ]);
 
       expect(mockPostMessage).toHaveBeenCalledWith(
         JSON.stringify({
           action: WebViewAction.CALL_SMART_CONTRACT,
-          data: {
-            contractAddress: '0xComplexContract...',
-            functionName: 'complexFunction',
-            functionParams: complexParams,
-            chainId: ChainId.POLYGON_AMOY,
-            value: '0.1',
-          },
+          data: [
+            {
+              contractAddress: '0xComplexContract...',
+              functionName: 'complexFunction',
+              functionParams: complexParams,
+              chainId: ChainId.POLYGON_AMOY,
+              value: '0.1',
+            },
+          ],
         })
       );
 
