@@ -152,14 +152,22 @@ export const withdraw = async ({ amount, tokenName }: WithdrawData): Promise<Wit
  * @param contracts[].value The amount of native tokens to send with the transaction
  * @param contracts[].permits Optional array of Permit2 permits for gasless token approvals
  * @param contracts[].contractStandard The contract standard if any (e.g. ERC20, ERC721, etc.)
+ * @param titleValues The values to replace in the title
+ * @param descriptionValues The values to replace in the description
  * @returns Promise that resolves with the transaction hash
  */
-export const callSmartContract = async (
-  contracts: CallSmartContractData[]
-): Promise<CallSmartContractResponse> => {
+export const callSmartContract = async ({
+  contracts,
+  titleValues,
+  descriptionValues,
+}: CallSmartContractData): Promise<CallSmartContractResponse> => {
   const message: CallSmartContractMessage = {
     action: WebViewAction.CALL_SMART_CONTRACT,
-    data: contracts,
+    data: {
+      contracts,
+      titleValues,
+      descriptionValues,
+    },
   };
 
   sendMessageToApp(message);
