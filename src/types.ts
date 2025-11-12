@@ -88,11 +88,15 @@ export type Permit = {
 };
 
 export type CallSmartContractData = {
+  contracts: ContractParams[];
+  titleValues?: Record<string, string>;
+  descriptionValues?: Record<string, string>;
+};
+
+export type ContractParams = {
   contractAddress: Address;
   functionName: string;
   functionParams: unknown[];
-  titleValues?: Record<string, string>;
-  descriptionValues?: Record<string, string>;
   value?: string;
   contractStandard?: ContractStandard;
   chainId?: ChainId;

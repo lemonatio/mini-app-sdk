@@ -379,22 +379,30 @@ describe('Core SDK Functions', () => {
       });
 
       const contractPromise = callSmartContract({
-        contractAddress: '0xContract...',
-        functionName: 'transfer',
-        functionParams: ['0xRecipient...', '1000000000000000000'],
-        chainId: ChainId.POLYGON_AMOY,
-        value: '0.001',
+        contracts: [
+          {
+            contractAddress: '0xContract...',
+            functionName: 'transfer',
+            functionParams: ['0xRecipient...', '1000000000000000000'],
+            chainId: ChainId.POLYGON_AMOY,
+            value: '0.001',
+          },
+        ],
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
         JSON.stringify({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
-            contractAddress: '0xContract...',
-            functionName: 'transfer',
-            functionParams: ['0xRecipient...', '1000000000000000000'],
-            chainId: ChainId.POLYGON_AMOY,
-            value: '0.001',
+            contracts: [
+              {
+                contractAddress: '0xContract...',
+                functionName: 'transfer',
+                functionParams: ['0xRecipient...', '1000000000000000000'],
+                chainId: ChainId.POLYGON_AMOY,
+                value: '0.001',
+              },
+            ],
           },
         })
       );
@@ -429,22 +437,30 @@ describe('Core SDK Functions', () => {
       });
 
       const contractPromise = callSmartContract({
-        contractAddress: '0xContract...',
-        functionName: 'drip',
-        functionParams: [],
-        chainId: ChainId.POLYGON_AMOY,
-        value: '0',
+        contracts: [
+          {
+            contractAddress: '0xContract...',
+            functionName: 'drip',
+            functionParams: [],
+            chainId: ChainId.POLYGON_AMOY,
+            value: '0',
+          },
+        ],
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
         JSON.stringify({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
-            contractAddress: '0xContract...',
-            functionName: 'drip',
-            functionParams: [],
-            chainId: ChainId.POLYGON_AMOY,
-            value: '0',
+            contracts: [
+              {
+                contractAddress: '0xContract...',
+                functionName: 'drip',
+                functionParams: [],
+                chainId: ChainId.POLYGON_AMOY,
+                value: '0',
+              },
+            ],
           },
         })
       );
@@ -467,11 +483,15 @@ describe('Core SDK Functions', () => {
 
       await expect(
         callSmartContract({
-          contractAddress: '0xContract...',
-          functionName: 'drip',
-          functionParams: [],
-          chainId: ChainId.POLYGON_AMOY,
-          value: '0',
+          contracts: [
+            {
+              contractAddress: '0xContract...',
+              functionName: 'drip',
+              functionParams: [],
+              chainId: ChainId.POLYGON_AMOY,
+              value: '0',
+            },
+          ],
         })
       ).rejects.toThrow('CALL_SMART_CONTRACT can only be used inside a React Native WebView');
     });
@@ -495,22 +515,30 @@ describe('Core SDK Functions', () => {
       const complexParams = ['0xAddress...', 12345, true, ['nested', 'array'], { key: 'value' }];
 
       const contractPromise = callSmartContract({
-        contractAddress: '0xComplexContract...',
-        functionName: 'complexFunction',
-        functionParams: complexParams,
-        chainId: ChainId.POLYGON_AMOY,
-        value: '0.1',
+        contracts: [
+          {
+            contractAddress: '0xComplexContract...',
+            functionName: 'complexFunction',
+            functionParams: complexParams,
+            chainId: ChainId.POLYGON_AMOY,
+            value: '0.1',
+          },
+        ],
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
         JSON.stringify({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
-            contractAddress: '0xComplexContract...',
-            functionName: 'complexFunction',
-            functionParams: complexParams,
-            chainId: ChainId.POLYGON_AMOY,
-            value: '0.1',
+            contracts: [
+              {
+                contractAddress: '0xComplexContract...',
+                functionName: 'complexFunction',
+                functionParams: complexParams,
+                chainId: ChainId.POLYGON_AMOY,
+                value: '0.1',
+              },
+            ],
           },
         })
       );
@@ -525,6 +553,133 @@ describe('Core SDK Functions', () => {
       expect(result.result).toBe(TransactionResult.SUCCESS);
       if (result.result === TransactionResult.SUCCESS) {
         expect(result.data.txHash).toBe('0xdef...');
+      }
+    });
+
+    it('should handle titleValues and descriptionValues', async () => {
+      const mockResponse = {
+        action: ActionResponse.CALL_SMART_CONTRACT_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          txHash: '0xghi...',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const titleValues = { amount: '100', token: 'USDC' };
+      const descriptionValues = { recipient: '0xRecipient...', network: 'Polygon' };
+
+      const contractPromise = callSmartContract({
+        contracts: [
+          {
+            contractAddress: '0xContract...',
+            functionName: 'transfer',
+            functionParams: ['0xRecipient...', '100'],
+            chainId: ChainId.POLYGON_AMOY,
+            value: '0',
+          },
+        ],
+        titleValues,
+        descriptionValues,
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        JSON.stringify({
+          action: WebViewAction.CALL_SMART_CONTRACT,
+          data: {
+            contracts: [
+              {
+                contractAddress: '0xContract...',
+                functionName: 'transfer',
+                functionParams: ['0xRecipient...', '100'],
+                chainId: ChainId.POLYGON_AMOY,
+                value: '0',
+              },
+            ],
+            titleValues,
+            descriptionValues,
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await contractPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+      if (result.result === TransactionResult.SUCCESS) {
+        expect(result.data.txHash).toBe('0xghi...');
+      }
+    });
+
+    it('should handle only titleValues without descriptionValues', async () => {
+      const mockResponse = {
+        action: ActionResponse.CALL_SMART_CONTRACT_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          txHash: '0xjkl...',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const titleValues = { amount: '50', token: 'ETH' };
+
+      const contractPromise = callSmartContract({
+        contracts: [
+          {
+            contractAddress: '0xContract...',
+            functionName: 'withdraw',
+            functionParams: ['50'],
+            chainId: ChainId.POLYGON_AMOY,
+            value: '0',
+          },
+        ],
+        titleValues,
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        JSON.stringify({
+          action: WebViewAction.CALL_SMART_CONTRACT,
+          data: {
+            contracts: [
+              {
+                contractAddress: '0xContract...',
+                functionName: 'withdraw',
+                functionParams: ['50'],
+                chainId: ChainId.POLYGON_AMOY,
+                value: '0',
+              },
+            ],
+            titleValues,
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await contractPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+      if (result.result === TransactionResult.SUCCESS) {
+        expect(result.data.txHash).toBe('0xjkl...');
       }
     });
   });

@@ -1,5 +1,11 @@
 import { stringifyMessage, convertToString } from '../src/utils';
-import { WebViewAction, ChainId, ContractStandard, CallSmartContractMessage } from '../src/types';
+import {
+  Address,
+  WebViewAction,
+  ChainId,
+  ContractStandard,
+  CallSmartContractMessage,
+} from '../src/types';
 
 describe('Utils', () => {
   describe('convertToString', () => {
@@ -67,61 +73,85 @@ describe('Utils', () => {
     });
 
     it('should stringify a complex CallSmartContractMessage', () => {
-      const testMessage = {
+      const testMessage: CallSmartContractMessage = {
         action: WebViewAction.CALL_SMART_CONTRACT,
         data: {
-          contractAddress: '0x1234567890123456789012345678901234567890' as const,
-          functionName: 'transfer',
-          functionParams: [
-            '0xabcdef1234567890abcdef1234567890abcdef12', // string
-            1000n, // bigint
-            ['param1', 'param2'], // string[]
-            [1n, 2n, 3n], // bigint[]
-            [
-              ['nested', 'array'],
-              [4n, 5n],
-            ], // nested arrays
+          contracts: [
             {
-              // object with bigint
-              amount: 500n,
-              nested: {
-                value: 1000n,
-                array: [1n, 2n, 3n],
-              },
-            },
-          ],
-          value: '1000000000000000000',
-          contractStandard: ContractStandard.ERC20,
-          chainId: ChainId.ETH,
-          permits: [
-            {
-              owner: '0xowner1234567890123456789012345678901234567890' as const,
-              token: '0xtoken1234567890123456789012345678901234567890' as const,
-              spender: '0xspender1234567890123456789012345678901234567890' as const,
-              amount: '1000000000000000000',
-              deadline: '1640995200',
-              nonce: '123',
+              contractAddress: '0x1234567890123456789012345678901234567890' as Address,
+              functionName: 'transfer',
+              functionParams: [
+                '0xabcdef1234567890abcdef1234567890abcdef12', // string
+                1000n, // bigint
+                ['param1', 'param2'], // string[]
+                [1n, 2n, 3n], // bigint[]
+                [
+                  ['nested', 'array'],
+                  [4n, 5n],
+                ], // nested arrays
+                {
+                  // object with bigint
+                  amount: 500n,
+                  nested: {
+                    value: 1000n,
+                    array: [1n, 2n, 3n],
+                  },
+                },
+              ],
+              value: '1000000000000000000',
+              contractStandard: ContractStandard.ERC20,
+              chainId: ChainId.ETH,
+              permits: [
+                {
+                  owner: '0xowner1234567890123456789012345678901234567890' as Address,
+                  token: '0xtoken1234567890123456789012345678901234567890' as Address,
+                  spender: '0xspender1234567890123456789012345678901234567890' as Address,
+                  amount: '1000000000000000000',
+                  deadline: '1640995200',
+                  nonce: '123',
+                },
+              ],
             },
           ],
         },
       };
 
       const result = stringifyMessage(testMessage);
-      const parsed = JSON.parse(result) as CallSmartContractMessage;
+      const parsed = JSON.parse(result) as {
+        action: string;
+        data: {
+          contracts: Array<{
+            contractAddress: string;
+            functionName: string;
+            functionParams: unknown[];
+            value: string;
+            contractStandard: string;
+            chainId: number;
+            permits: unknown[];
+          }>;
+        };
+      };
 
       // Verify the structure is preserved
       expect(parsed.action).toBe('CALL_SMART_CONTRACT');
-      expect(parsed.data.contractAddress).toBe('0x1234567890123456789012345678901234567890');
-      expect(parsed.data.functionName).toBe('transfer');
+      expect(parsed.data.contracts[0]!.contractAddress).toBe(
+        '0x1234567890123456789012345678901234567890'
+      );
+      expect(parsed.data.contracts[0]!.functionName).toBe('transfer');
 
       // Verify BigInt values are converted to strings
-      expect(parsed.data.functionParams[1]).toBe('1000'); // 1000n -> '1000'
-      expect(parsed.data.functionParams[3]).toEqual(['1', '2', '3']); // [1n, 2n, 3n] -> ['1', '2', '3']
-      expect(parsed.data.functionParams[4]).toEqual([
+      expect(parsed.data.contracts[0]!.functionParams[1] as string).toBe('1000'); // 1000n -> '1000'
+      expect(parsed.data.contracts[0]!.functionParams[3] as string[]).toEqual(['1', '2', '3']); // [1n, 2n, 3n] -> ['1', '2', '3']
+      expect(parsed.data.contracts[0]!.functionParams[4] as (string | string[])[]).toEqual([
         ['nested', 'array'],
         ['4', '5'],
       ]); // nested arrays
-      expect(parsed.data.functionParams[5]).toEqual({
+      expect(
+        parsed.data.contracts[0]!.functionParams[5] as {
+          amount: string;
+          nested: { value: string; array: string[] };
+        }
+      ).toEqual({
         amount: '500',
         nested: {
           value: '1000',
@@ -153,12 +183,17 @@ describe('Utils', () => {
     });
 
     it('should preserve titleValues and descriptionValues Record<string, string>', () => {
-      const message = {
+      const message: CallSmartContractMessage = {
         action: WebViewAction.CALL_SMART_CONTRACT,
         data: {
-          contractAddress: '0x1234567890123456789012345678901234567890' as const,
-          functionName: 'swap',
-          functionParams: [1000n, 2000n],
+          contracts: [
+            {
+              contractAddress: '0x1234567890123456789012345678901234567890' as Address,
+              functionName: 'swap',
+              functionParams: [1000n, 2000n],
+              chainId: ChainId.POLYGON,
+            },
+          ],
           titleValues: {
             amount: '100',
             token: 'USDC',
@@ -168,12 +203,23 @@ describe('Utils', () => {
             toToken: 'USDC',
             rate: '1.5',
           },
-          chainId: ChainId.POLYGON,
         },
       };
 
       const result = stringifyMessage(message);
-      const parsed = JSON.parse(result) as CallSmartContractMessage;
+      const parsed = JSON.parse(result) as {
+        action: string;
+        data: {
+          contracts: Array<{
+            contractAddress: string;
+            functionName: string;
+            functionParams: unknown[];
+            chainId: number;
+          }>;
+          titleValues?: Record<string, string>;
+          descriptionValues?: Record<string, string>;
+        };
+      };
 
       // Verify titleValues and descriptionValues are preserved
       expect(parsed.data.titleValues).toEqual({
@@ -187,8 +233,8 @@ describe('Utils', () => {
       });
 
       // Verify BigInt values are still converted
-      expect(parsed.data.functionParams[0]).toBe('1000');
-      expect(parsed.data.functionParams[1]).toBe('2000');
+      expect(parsed.data.contracts[0]!.functionParams[0]).toBe('1000');
+      expect(parsed.data.contracts[0]!.functionParams[1]).toBe('2000');
     });
   });
 });

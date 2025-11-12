@@ -23,6 +23,7 @@ export type {
   DepositData,
   WithdrawData,
   CallSmartContractData,
+  ContractParams,
 
   // App to WebView response types
   AuthenticateResponse,
