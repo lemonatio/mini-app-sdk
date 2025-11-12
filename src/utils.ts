@@ -37,5 +37,8 @@ export const convertToString = (value: unknown): unknown => {
  * @returns The stringified message
  */
 export const stringifyMessage = (message: unknown): string => {
-  return JSON.stringify(message, (_key, value) => convertToString(value));
+  // First convert all BigInt values to strings, then stringify
+  // This is necessary because JSON.stringify cannot handle BigInt values
+  const converted = convertToString(message);
+  return JSON.stringify(converted);
 };

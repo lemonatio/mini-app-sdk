@@ -84,10 +84,16 @@ export type Permit = {
   spender: Address;
   amount: string;
   deadline: string; // Unix timestamp (in seconds)
-  nonce?: string;
+  nonce: string;
 };
 
 export type CallSmartContractData = {
+  contracts: ContractParams[];
+  titleValues?: Record<string, string>;
+  descriptionValues?: Record<string, string>;
+};
+
+export type ContractParams = {
   contractAddress: Address;
   functionName: string;
   functionParams: unknown[];
@@ -213,7 +219,9 @@ export enum ChainId {
   // Mainnet
   ARBITRUM_ONE = 42161,
   BASE = 8453,
+  CELO = 42220,
   ETH = 1,
+  GNOSIS = 100,
   OP_MAINNET = 10,
   POLYGON = 137,
 
