@@ -1,5 +1,12 @@
 
 
+## [0.1.9](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.5...v0.1.9) (2025-11-12)
+
+
+### Features
+
+* Batch transactions ([#17](https://github.com/lemonatio/mini-app-sdk/issues/17)) ([76d7c4f](https://github.com/lemonatio/mini-app-sdk/commit/76d7c4fa927c37a1a527607957729108fe7ba321))
+
 ## [0.1.5](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.4...v0.1.5) (2025-10-29)
 
 
