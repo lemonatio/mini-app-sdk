@@ -1,5 +1,17 @@
 
 
+## [0.1.10](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.9...v0.1.10) (2025-12-10)
+
+
+### Features
+
+* add new tokens ([e5e1268](https://github.com/lemonatio/mini-app-sdk/commit/e5e1268ff37d34e57a0aad64f05e7bf52d992aa7))
+
+
+### Reverts
+
+* bump to 0.1.10 ([3ee3a49](https://github.com/lemonatio/mini-app-sdk/commit/3ee3a497895f67e8afda46be13667af1a1ddb245))
+
 ## [0.1.9](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.5...v0.1.9) (2025-11-12)
 
 
