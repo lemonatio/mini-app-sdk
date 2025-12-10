@@ -1,0 +1,22 @@
+name: Security Checks
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [ synchronize, opened, reopened, ready_for_review ]
+    branches:
+      - main
+      - master
+      - develop
+
+jobs:
+  semgrep:
+    uses: lemonatio/workflows/.github/workflows/service-semgrep.yml@develop
+  
+  sca:
+    uses: lemonatio/workflows/.github/workflows/service-sca.yml@develop
+    with:
+      workflows_branch: develop
+    permissions:
+      id-token: write
+      contents: read
