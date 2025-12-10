@@ -235,11 +235,24 @@ export enum ChainId {
 }
 
 export enum TokenName {
-  ETH = 'ETH',
-  POL = 'POL',
+  AAVE = 'AAVE',
+  ARB = 'ARB',
+  AVAX = 'AVAX',
+  AXS = 'AXS',
+  BNB = 'BNB',
+  CELO = 'CELO',
   DAI = 'DAI',
+  ETH = 'ETH',
+  GNO = 'GNO',
+  LINK = 'LINK',
+  OP = 'OP',
+  PAXG = 'PAXG',
+  POL = 'POL',
+  UNI = 'UNI',
   USDC = 'USDC',
   USDT = 'USDT',
+  USDS = 'USDS',
+  XDAI = 'XDAI',
 }
 
 export enum ContractStandard {
