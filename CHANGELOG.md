@@ -1,5 +1,7 @@
 
 
+## [0.1.11](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.10...v0.1.11) (2025-12-15)
+
 ## [0.1.10](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.9...v0.1.10) (2025-12-10)
 
 
