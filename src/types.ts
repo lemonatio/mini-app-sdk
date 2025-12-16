@@ -259,6 +259,8 @@ export enum TokenName {
   USDT = 'USDT',
   USDS = 'USDS',
   XDAI = 'XDAI',
+  RBTC = 'RBTC',
+  RIF = 'RIF',
 }
 
 export enum ContractStandard {
