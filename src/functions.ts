@@ -74,7 +74,7 @@ const sendMessageToApp = <T extends WebViewMessage>(message: T): void => {
   if (typeof window !== 'undefined' && window.ReactNativeWebView) {
     window.ReactNativeWebView.postMessage(stringifyMessage(message));
   } else {
-    throw new Error('window.ReactNativeWebView is not available');
+    throw new Error(`${message.action} can only be used inside a React Native WebView`);
   }
 };
 

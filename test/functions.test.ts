@@ -250,7 +250,7 @@ describe('Core SDK Functions', () => {
 
       await expect(
         deposit({ amount: '100', tokenName: TokenName.USDC, chainId: ChainId.POLYGON_AMOY })
-      ).rejects.toThrow('window.ReactNativeWebView is not available');
+      ).rejects.toThrow('DEPOSIT can only be used inside a React Native WebView');
     });
 
     it('should handle different currencies and networks', async () => {
@@ -392,7 +392,7 @@ describe('Core SDK Functions', () => {
       setupWebViewEnvironment(false);
 
       await expect(withdraw({ amount: '50', tokenName: TokenName.ETH })).rejects.toThrow(
-        'window.ReactNativeWebView is not available'
+        'WITHDRAW can only be used inside a React Native WebView'
       );
     });
 
@@ -570,7 +570,7 @@ describe('Core SDK Functions', () => {
             },
           ],
         })
-      ).rejects.toThrow('window.ReactNativeWebView is not available');
+      ).rejects.toThrow('CALL_SMART_CONTRACT can only be used inside a React Native WebView');
     });
 
     it('should handle complex function parameters', async () => {
@@ -814,7 +814,7 @@ describe('Core SDK Functions', () => {
 
       await expect(
         authenticate({ nonce: 'test-nonce', chainId: ChainId.POLYGON_AMOY })
-      ).rejects.toThrow('window.ReactNativeWebView is not available');
+      ).rejects.toThrow('AUTHENTICATE can only be used inside a React Native WebView');
     });
 
     it('should handle different nonce formats', async () => {
