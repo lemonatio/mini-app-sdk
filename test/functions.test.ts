@@ -1,5 +1,13 @@
-import { deposit, withdraw, callSmartContract, authenticate, isWebView } from '../src/functions';
+import {
+  deposit,
+  withdraw,
+  callSmartContract,
+  authenticate,
+  isWebView,
+  isLemonWebView,
+} from '../src/functions';
 import { ChainId, WebViewAction, ActionResponse, TransactionResult, TokenName } from '../src/types';
+import { stringifyMessage } from '../src/utils';
 
 // Mock window.ReactNativeWebView
 const mockPostMessage = jest.fn();
@@ -118,6 +126,75 @@ describe('Core SDK Functions', () => {
     });
   });
 
+  describe('isLemonWebView', () => {
+    it('should return false when not in a WebView', async () => {
+      setupWebViewEnvironment(false);
+      await expect(isLemonWebView()).resolves.toBe(false);
+    });
+
+    it('should return true when Lemon WebView responds with success', async () => {
+      const mockResponse = {
+        action: ActionResponse.IS_LEMON_WEBVIEW_RESPONSE,
+        result: TransactionResult.SUCCESS,
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const lemonPromise = isLemonWebView();
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.IS_LEMON_WEBVIEW,
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 10);
+
+      jest.advanceTimersByTime(10);
+
+      await expect(lemonPromise).resolves.toBe(true);
+    });
+
+    it('should return false when Lemon WebView responds with failure', async () => {
+      const mockResponse = {
+        action: ActionResponse.IS_LEMON_WEBVIEW_RESPONSE,
+        result: TransactionResult.FAILED,
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const lemonPromise = isLemonWebView();
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 10);
+
+      jest.advanceTimersByTime(10);
+
+      await expect(lemonPromise).resolves.toBe(false);
+    });
+
+    it('should return false on timeout', async () => {
+      const lemonPromise = isLemonWebView();
+
+      jest.advanceTimersByTime(1000);
+
+      await expect(lemonPromise).resolves.toBe(false);
+    });
+  });
+
   describe('deposit', () => {
     it('should send deposit message and wait for response', async () => {
       const mockResponse = {
@@ -144,7 +221,7 @@ describe('Core SDK Functions', () => {
 
       // Verify the message was sent
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.DEPOSIT,
           data: {
             amount: '100',
@@ -156,7 +233,7 @@ describe('Core SDK Functions', () => {
 
       // Simulate response
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -173,7 +250,7 @@ describe('Core SDK Functions', () => {
 
       await expect(
         deposit({ amount: '100', tokenName: TokenName.USDC, chainId: ChainId.POLYGON_AMOY })
-      ).rejects.toThrow('DEPOSIT can only be used inside a React Native WebView');
+      ).rejects.toThrow('window.ReactNativeWebView is not available');
     });
 
     it('should handle different currencies and networks', async () => {
@@ -199,7 +276,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.DEPOSIT,
           data: {
             amount: '50',
@@ -210,7 +287,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -245,7 +322,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.DEPOSIT,
           data: {
             amount: '0',
@@ -256,7 +333,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -289,7 +366,7 @@ describe('Core SDK Functions', () => {
       const withdrawPromise = withdraw({ amount: '50', tokenName: TokenName.ETH });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.WITHDRAW,
           data: {
             amount: '50',
@@ -299,7 +376,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -315,7 +392,7 @@ describe('Core SDK Functions', () => {
       setupWebViewEnvironment(false);
 
       await expect(withdraw({ amount: '50', tokenName: TokenName.ETH })).rejects.toThrow(
-        'WITHDRAW can only be used inside a React Native WebView'
+        'window.ReactNativeWebView is not available'
       );
     });
 
@@ -338,7 +415,7 @@ describe('Core SDK Functions', () => {
       const withdrawPromise = withdraw({ amount: '100', tokenName: TokenName.USDC });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.WITHDRAW,
           data: {
             amount: '100',
@@ -348,7 +425,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -391,7 +468,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
             contracts: [
@@ -408,7 +485,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -449,7 +526,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
             contracts: [
@@ -466,7 +543,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -493,7 +570,7 @@ describe('Core SDK Functions', () => {
             },
           ],
         })
-      ).rejects.toThrow('CALL_SMART_CONTRACT can only be used inside a React Native WebView');
+      ).rejects.toThrow('window.ReactNativeWebView is not available');
     });
 
     it('should handle complex function parameters', async () => {
@@ -527,7 +604,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
             contracts: [
@@ -544,7 +621,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -590,7 +667,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
             contracts: [
@@ -609,7 +686,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -653,7 +730,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
             contracts: [
@@ -671,7 +748,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -707,7 +784,7 @@ describe('Core SDK Functions', () => {
       const authPromise = authenticate({ nonce: 'test-nonce-123', chainId: ChainId.POLYGON_AMOY });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.AUTHENTICATE,
           data: {
             nonce: 'test-nonce-123',
@@ -717,7 +794,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -737,7 +814,7 @@ describe('Core SDK Functions', () => {
 
       await expect(
         authenticate({ nonce: 'test-nonce', chainId: ChainId.POLYGON_AMOY })
-      ).rejects.toThrow('AUTHENTICATE can only be used inside a React Native WebView');
+      ).rejects.toThrow('window.ReactNativeWebView is not available');
     });
 
     it('should handle different nonce formats', async () => {
@@ -763,7 +840,7 @@ describe('Core SDK Functions', () => {
       const authPromise = authenticate({ nonce: longNonce, chainId: ChainId.POLYGON_AMOY });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.AUTHENTICATE,
           data: {
             nonce: longNonce,
@@ -773,7 +850,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -848,7 +925,7 @@ describe('Core SDK Functions', () => {
       setTimeout(() => {
         messageHandler(
           new MessageEvent('message', {
-            data: JSON.stringify({
+            data: stringifyMessage({
               action: 'WRONG_ACTION',
               result: TransactionResult.SUCCESS,
               txHash: '0x123...',
