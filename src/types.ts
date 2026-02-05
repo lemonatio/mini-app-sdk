@@ -32,6 +32,7 @@ export type Hex = `0x${string}`;
  * ***************************************************
  */
 export enum WebViewAction {
+  IS_LEMON_WEBVIEW = 'IS_LEMON_WEBVIEW',
   AUTHENTICATE = 'AUTHENTICATE',
   DEPOSIT = 'DEPOSIT',
   WITHDRAW = 'WITHDRAW',
@@ -109,6 +110,7 @@ export type ContractParams = {
  * ***************************************************
  */
 export enum ActionResponse {
+  IS_LEMON_WEBVIEW_RESPONSE = 'IS_LEMON_WEBVIEW_RESPONSE',
   AUTHENTICATE_RESPONSE = 'AUTHENTICATE_RESPONSE',
   DEPOSIT_RESPONSE = 'DEPOSIT_RESPONSE',
   WITHDRAW_RESPONSE = 'WITHDRAW_RESPONSE',
@@ -124,6 +126,11 @@ export enum TransactionResult {
 export type AppMessage = {
   action: ActionResponse;
   result: TransactionResult;
+};
+
+export type IsLemonWebViewResponse = AppMessage & {
+  action: ActionResponse.IS_LEMON_WEBVIEW_RESPONSE;
+  result: TransactionResult.SUCCESS;
 };
 
 export type AuthenticateResponse = AppMessage &
@@ -218,6 +225,7 @@ export type CallSmartContractResponse = AppMessage &
 export enum ChainId {
   // Mainnet
   ARBITRUM_ONE = 42161,
+  AVALANCHE = 43114,
   BASE = 8453,
   BNB_SMART_CHAIN = 56,
   CELO = 42220,
@@ -229,6 +237,7 @@ export enum ChainId {
 
   // Testnet
   ARBITRUM_SEPOLIA = 421614,
+  AVALANCHE_FUJI = 43113,
   BASE_SEPOLIA = 84532,
   BNB_SMART_CHAIN_TESTNET = 97,
   CELO_SEPOLIA = 11142220,
@@ -246,6 +255,7 @@ export enum TokenName {
   AVAX = 'AVAX',
   AXS = 'AXS',
   BNB = 'BNB',
+  BTC = 'BTC',
   CELO = 'CELO',
   DAI = 'DAI',
   ETH = 'ETH',
@@ -254,6 +264,7 @@ export enum TokenName {
   OP = 'OP',
   PAXG = 'PAXG',
   POL = 'POL',
+  RIF = 'RIF',
   UNI = 'UNI',
   USDC = 'USDC',
   USDT = 'USDT',
