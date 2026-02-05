@@ -225,6 +225,7 @@ export type CallSmartContractResponse = AppMessage &
 export enum ChainId {
   // Mainnet
   ARBITRUM_ONE = 42161,
+  AVALANCHE = 43114,
   BASE = 8453,
   BNB_SMART_CHAIN = 56,
   CELO = 42220,
@@ -236,6 +237,7 @@ export enum ChainId {
 
   // Testnet
   ARBITRUM_SEPOLIA = 421614,
+  AVALANCHE_FUJI = 43113,
   BASE_SEPOLIA = 84532,
   BNB_SMART_CHAIN_TESTNET = 97,
   CELO_SEPOLIA = 11142220,
