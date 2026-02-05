@@ -6,7 +6,14 @@ import {
   isWebView,
   isLemonWebView,
 } from '../src/functions';
-import { ChainId, WebViewAction, ActionResponse, TransactionResult, TokenName } from '../src/types';
+import {
+  ChainId,
+  WebViewAction,
+  ActionResponse,
+  TransactionResult,
+  TokenName,
+  ClaimKey,
+} from '../src/types';
 import { stringifyMessage } from '../src/utils';
 
 // Mock window.ReactNativeWebView
@@ -866,6 +873,332 @@ describe('Core SDK Functions', () => {
     });
   });
 
+  describe('authenticate with requirements', () => {
+    it('should send requirements with claims in the authenticate message', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          wallet: '0x3A3399721eeC94E88EB1104325E46bf4BdA67366' as const,
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG],
+          signature: '0xSignature...' as const,
+          message: 'Sign in with Ethereum',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG],
+        },
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.AUTHENTICATE,
+          data: {
+            nonce: 'test1234',
+            chainId: ChainId.BASE_SEPOLIA,
+            requirements: {
+              claims: [ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG],
+            },
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+      if (result.result === TransactionResult.SUCCESS) {
+        expect(result.data.wallet).toBe('0x3A3399721eeC94E88EB1104325E46bf4BdA67366');
+        expect(result.data.claims).toEqual([ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG]);
+        expect(result.data.signature).toBe('0xSignature...');
+        expect(result.data.message).toBe('Sign in with Ethereum');
+      }
+    });
+
+    it('should send requirements with permissions in the authenticate message', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          wallet: '0xSafeAddress...' as const,
+          claims: [],
+          signature: '0xSig...' as const,
+          message: 'Sign in with Ethereum',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {
+          permissions: ['CAMERA', 'LOCATION'],
+        },
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.AUTHENTICATE,
+          data: {
+            nonce: 'test1234',
+            chainId: ChainId.BASE_SEPOLIA,
+            requirements: {
+              permissions: ['CAMERA', 'LOCATION'],
+            },
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+    });
+
+    it('should send requirements with both claims and permissions', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          wallet: '0xSafeAddress...' as const,
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL],
+          signature: '0xSig...' as const,
+          message: 'Sign in with Ethereum',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL],
+          permissions: ['CAMERA'],
+        },
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.AUTHENTICATE,
+          data: {
+            nonce: 'test1234',
+            chainId: ChainId.BASE_SEPOLIA,
+            requirements: {
+              claims: [ClaimKey.NAME, ClaimKey.EMAIL],
+              permissions: ['CAMERA'],
+            },
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+      if (result.result === TransactionResult.SUCCESS) {
+        expect(result.data.claims).toEqual([ClaimKey.NAME, ClaimKey.EMAIL]);
+      }
+    });
+
+    it('should handle authenticate without requirements and return empty claims', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          wallet: '0x3A3399721eeC94E88EB1104325E46bf4BdA67366' as const,
+          claims: [],
+          signature: '0xSig...' as const,
+          message: 'Sign in with Ethereum',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.AUTHENTICATE,
+          data: {
+            nonce: 'test1234',
+            chainId: ChainId.BASE_SEPOLIA,
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+      if (result.result === TransactionResult.SUCCESS) {
+        expect(result.data.claims).toEqual([]);
+      }
+    });
+
+    it('should handle FAILED result when requirements are pending', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.FAILED,
+        error: {
+          code: 'REQUIREMENTS_PENDING',
+          message: 'User has not confirmed the required claims',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG],
+        },
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.FAILED);
+      if (result.result === TransactionResult.FAILED) {
+        expect(result.error.code).toBe('REQUIREMENTS_PENDING');
+        expect(result.error.message).toBe('User has not confirmed the required claims');
+      }
+    });
+
+    it('should handle CANCELLED result when user rejects requirements', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.CANCELLED,
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL],
+        },
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.CANCELLED);
+    });
+
+    it('should send empty requirements object when provided', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          wallet: '0xSafeAddress...' as const,
+          claims: [],
+          signature: '0xSig...' as const,
+          message: 'Sign in with Ethereum',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {},
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.AUTHENTICATE,
+          data: {
+            nonce: 'test1234',
+            chainId: ChainId.BASE_SEPOLIA,
+            requirements: {},
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+    });
+  });
+
   describe('response handling edge cases', () => {
     it('should handle timeout for deposit', async () => {
       const depositPromise = deposit({
@@ -883,6 +1216,9 @@ describe('Core SDK Functions', () => {
     });
 
     it('should handle malformed response', () => {
+      // Mock console.log to silence expected error logs
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
       let messageHandler: MessageEventHandler;
       mockAddEventListener.mockImplementation((event, handler) => {
         if (event === 'message') {
@@ -905,9 +1241,15 @@ describe('Core SDK Functions', () => {
 
       // Should still be waiting for valid response
       expect(depositPromise).toBeDefined();
+
+      // Restore console.log
+      consoleSpy.mockRestore();
     });
 
     it('should handle wrong response action', () => {
+      // Mock console.log to silence expected error logs
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
       let messageHandler: MessageEventHandler;
       mockAddEventListener.mockImplementation((event, handler) => {
         if (event === 'message') {
@@ -938,6 +1280,9 @@ describe('Core SDK Functions', () => {
 
       // Should still be waiting for correct response
       expect(depositPromise).toBeDefined();
+
+      // Restore console.log
+      consoleSpy.mockRestore();
     });
   });
 });
