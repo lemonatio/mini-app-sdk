@@ -51,6 +51,10 @@ export type AuthenticateMessage = WebViewMessage & {
 export type AuthenticateData = {
   nonce?: string;
   chainId?: ChainId;
+  requirements?: {
+    claims?: string[];
+    permissions?: string[];
+  };
 };
 
 export type DepositMessage = WebViewMessage & {

@@ -215,12 +215,14 @@ export const callSmartContract = async ({
 export const authenticate = async ({
   nonce,
   chainId,
+  requirements,
 }: AuthenticateData = {}): Promise<AuthenticateResponse> => {
   const message: AuthenticateMessage = {
     action: WebViewAction.AUTHENTICATE,
     data: {
       nonce,
       chainId,
+      requirements,
     },
   };
 
