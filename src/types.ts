@@ -50,7 +50,11 @@ export type AuthenticateMessage = WebViewMessage & {
 
 export type AuthenticateData = {
   nonce?: string;
-  chainId?: ChainId;
+  chainId: ChainId;
+  requirements?: {
+    claims?: ClaimKey[];
+    permissions?: string[];
+  };
 };
 
 export type DepositMessage = WebViewMessage & {
@@ -123,6 +127,15 @@ export enum TransactionResult {
   CANCELLED = 'CANCELLED',
 }
 
+export enum ClaimKey {
+  NAME = 'NAME',
+  LAST_NAME = 'LAST_NAME',
+  EMAIL = 'EMAIL',
+  IS_PEP = 'IS_PEP',
+  LEMONTAG = 'LEMONTAG',
+  OPERATION_COUNTRY = 'OPERATION_COUNTRY',
+}
+
 export type AppMessage = {
   action: ActionResponse;
   result: TransactionResult;
@@ -140,7 +153,7 @@ export type AuthenticateResponse = AppMessage &
         result: TransactionResult.SUCCESS;
         data: {
           wallet: Address;
-          claims: string[];
+          claims: ClaimKey[];
           signature: Hex;
           message: string;
         };
