@@ -216,7 +216,7 @@ export const authenticate = async ({
   nonce,
   chainId,
   requirements,
-}: AuthenticateData = {}): Promise<AuthenticateResponse> => {
+}: AuthenticateData): Promise<AuthenticateResponse> => {
   const message: AuthenticateMessage = {
     action: WebViewAction.AUTHENTICATE,
     data: {
