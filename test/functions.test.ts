@@ -370,7 +370,11 @@ describe('Core SDK Functions', () => {
         }
       });
 
-      const withdrawPromise = withdraw({ amount: '50', tokenName: TokenName.ETH });
+      const withdrawPromise = withdraw({
+        amount: '50',
+        tokenName: TokenName.ETH,
+        chainId: ChainId.POLYGON_AMOY,
+      });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
         stringifyMessage({
@@ -378,6 +382,7 @@ describe('Core SDK Functions', () => {
           data: {
             amount: '50',
             tokenName: TokenName.ETH,
+            chainId: ChainId.POLYGON_AMOY,
           },
         })
       );
@@ -398,9 +403,9 @@ describe('Core SDK Functions', () => {
     it('should throw error when not in WebView', async () => {
       setupWebViewEnvironment(false);
 
-      await expect(withdraw({ amount: '50', tokenName: TokenName.ETH })).rejects.toThrow(
-        'WITHDRAW can only be used inside a React Native WebView'
-      );
+      await expect(
+        withdraw({ amount: '50', tokenName: TokenName.ETH, chainId: ChainId.POLYGON_AMOY })
+      ).rejects.toThrow('WITHDRAW can only be used inside a React Native WebView');
     });
 
     it('should handle different address formats', async () => {
@@ -419,7 +424,11 @@ describe('Core SDK Functions', () => {
         }
       });
 
-      const withdrawPromise = withdraw({ amount: '100', tokenName: TokenName.USDC });
+      const withdrawPromise = withdraw({
+        amount: '100',
+        tokenName: TokenName.USDC,
+        chainId: ChainId.POLYGON_AMOY,
+      });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
         stringifyMessage({
@@ -427,6 +436,7 @@ describe('Core SDK Functions', () => {
           data: {
             amount: '100',
             tokenName: TokenName.USDC,
+            chainId: ChainId.POLYGON_AMOY,
           },
         })
       );

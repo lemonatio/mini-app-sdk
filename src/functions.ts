@@ -151,14 +151,20 @@ export const deposit = async ({
  * Initiates a withdrawal transaction.
  * @param amount The amount to withdraw
  * @param tokenName The token name to withdraw (e.g. 'USDC', 'ETH')
+ * @param chainId The chain id to use
  * @returns Promise that resolves with the transaction hash
  */
-export const withdraw = async ({ amount, tokenName }: WithdrawData): Promise<WithdrawResponse> => {
+export const withdraw = async ({
+  amount,
+  tokenName,
+  chainId,
+}: WithdrawData): Promise<WithdrawResponse> => {
   const message: WithdrawMessage = {
     action: WebViewAction.WITHDRAW,
     data: {
       amount,
       tokenName,
+      chainId,
     },
   };
 
