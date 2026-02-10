@@ -65,7 +65,7 @@ export type DepositMessage = WebViewMessage & {
 export type DepositData = {
   amount: string;
   tokenName: TokenName;
-  chainId?: ChainId;
+  chainId: ChainId;
 };
 
 export type WithdrawMessage = WebViewMessage & {
@@ -76,6 +76,7 @@ export type WithdrawMessage = WebViewMessage & {
 export type WithdrawData = {
   amount: string;
   tokenName: TokenName;
+  chainId: ChainId;
 };
 
 export type CallSmartContractMessage = WebViewMessage & {
@@ -104,7 +105,7 @@ export type ContractParams = {
   functionParams: unknown[];
   value?: string;
   contractStandard?: ContractStandard;
-  chainId?: ChainId;
+  chainId: ChainId;
   permits?: Permit[];
 };
 
