@@ -1,5 +1,13 @@
 
 
+## [0.1.12](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.11...v0.1.12) (2026-02-19)
+
+
+### Features
+
+* add requirements ([#31](https://github.com/lemonatio/mini-app-sdk/issues/31)) ([2b856cb](https://github.com/lemonatio/mini-app-sdk/commit/2b856cb346dc5958030adca55b577d2fd5f3bbff))
+* make chainId required in deposit, withdraw and callSmartContract ([#32](https://github.com/lemonatio/mini-app-sdk/issues/32)) ([1ef931d](https://github.com/lemonatio/mini-app-sdk/commit/1ef931d960547bb05e1a9625618de8154da276f8))
+
 ## [0.1.11](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.10...v0.1.11) (2025-12-15)
 
 ## [0.1.10](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.9...v0.1.10) (2025-12-10)
