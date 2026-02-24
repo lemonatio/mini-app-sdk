@@ -6,6 +6,7 @@ export {
   deposit,
   withdraw,
   callSmartContract,
+  transferMoney,
 } from './functions';
 
 // Types
@@ -24,6 +25,7 @@ export type {
   DepositMessage,
   WithdrawMessage,
   CallSmartContractMessage,
+  TransferMoneyMessage,
 
   // Action data types
   AuthenticateData,
@@ -31,6 +33,7 @@ export type {
   WithdrawData,
   CallSmartContractData,
   ContractParams,
+  TransferMoneyData,
 
   // App to WebView response types
   IsLemonWebViewResponse,
@@ -38,6 +41,7 @@ export type {
   DepositResponse,
   WithdrawResponse,
   CallSmartContractResponse,
+  TransferMoneyResponse,
 
   // Permit2 types
   Permit,
@@ -51,4 +55,5 @@ export {
   TransactionResult,
   TokenName,
   ContractStandard,
+  Currency,
 } from './types';

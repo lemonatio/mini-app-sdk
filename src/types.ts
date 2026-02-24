@@ -37,6 +37,7 @@ export enum WebViewAction {
   DEPOSIT = 'DEPOSIT',
   WITHDRAW = 'WITHDRAW',
   CALL_SMART_CONTRACT = 'CALL_SMART_CONTRACT',
+  TRANSFER_MONEY = 'TRANSFER_MONEY',
 }
 
 export type WebViewMessage = {
@@ -84,6 +85,18 @@ export type CallSmartContractMessage = WebViewMessage & {
   data: CallSmartContractData;
 };
 
+export type TransferMoneyData = {
+  amount: string;
+  currency: Currency;
+  name?: string;
+  bankDetails: Record<string, unknown>;
+};
+
+export type TransferMoneyMessage = WebViewMessage & {
+  action: WebViewAction.TRANSFER_MONEY;
+  data: TransferMoneyData;
+};
+
 export type Permit = {
   owner: Address;
   token: Address;
@@ -120,6 +133,7 @@ export enum ActionResponse {
   DEPOSIT_RESPONSE = 'DEPOSIT_RESPONSE',
   WITHDRAW_RESPONSE = 'WITHDRAW_RESPONSE',
   CALL_SMART_CONTRACT_RESPONSE = 'CALL_SMART_CONTRACT_RESPONSE',
+  TRANSFER_MONEY_RESPONSE = 'TRANSFER_MONEY_RESPONSE',
 }
 
 export enum TransactionResult {
@@ -230,6 +244,24 @@ export type CallSmartContractResponse = AppMessage &
       }
   );
 
+export type TransferMoneyResponse = AppMessage &
+  (
+    | {
+        action: ActionResponse.TRANSFER_MONEY_RESPONSE;
+        result: TransactionResult.SUCCESS;
+        data: { transferId: string };
+      }
+    | {
+        action: ActionResponse.TRANSFER_MONEY_RESPONSE;
+        result: TransactionResult.FAILED;
+        error: MiniAppError;
+      }
+    | {
+        action: ActionResponse.TRANSFER_MONEY_RESPONSE;
+        result: TransactionResult.CANCELLED;
+      }
+  );
+
 /**
  * ***************************************************
  *             Enums
@@ -288,4 +320,9 @@ export enum TokenName {
 
 export enum ContractStandard {
   ERC20 = 'ERC20',
+}
+
+export enum Currency {
+  ARS = 'ARS',
+  PEN = 'PEN',
 }
