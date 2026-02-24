@@ -1232,7 +1232,7 @@ describe('Core SDK Functions', () => {
         amount: '1000',
         currency: Currency.ARS,
         name: 'John Doe',
-        bankDetails: { cbu: '0000000000000000000000' },
+        destinationId: 'dest-123',
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
@@ -1242,7 +1242,7 @@ describe('Core SDK Functions', () => {
             amount: '1000',
             currency: Currency.ARS,
             name: 'John Doe',
-            bankDetails: { cbu: '0000000000000000000000' },
+            destinationId: 'dest-123',
           },
         })
       );
@@ -1267,7 +1267,7 @@ describe('Core SDK Functions', () => {
         transferMoney({
           amount: '1000',
           currency: Currency.ARS,
-          bankDetails: { cbu: '0000000000000000000000' },
+          destinationId: 'dest-123',
         })
       ).rejects.toThrow('TRANSFER_MONEY can only be used inside a React Native WebView');
     });
@@ -1292,7 +1292,7 @@ describe('Core SDK Functions', () => {
       const transferPromise = transferMoney({
         amount: '1000',
         currency: Currency.ARS,
-        bankDetails: { cbu: '0000000000000000000000' },
+        destinationId: 'dest-123',
       });
 
       setTimeout(() => {
@@ -1325,7 +1325,7 @@ describe('Core SDK Functions', () => {
       const transferPromise = transferMoney({
         amount: '500',
         currency: Currency.PEN,
-        bankDetails: { cci: '00000000000000000000' },
+        destinationId: 'dest-456',
       });
 
       setTimeout(() => {
@@ -1357,7 +1357,7 @@ describe('Core SDK Functions', () => {
       const transferPromise = transferMoney({
         amount: '2000',
         currency: Currency.PEN,
-        bankDetails: { cci: '00000000000000000000' },
+        destinationId: 'dest-456',
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
@@ -1366,7 +1366,7 @@ describe('Core SDK Functions', () => {
           data: {
             amount: '2000',
             currency: Currency.PEN,
-            bankDetails: { cci: '00000000000000000000' },
+            destinationId: 'dest-456',
           },
         })
       );

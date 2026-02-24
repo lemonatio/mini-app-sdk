@@ -89,7 +89,7 @@ export type TransferMoneyData = {
   amount: string;
   currency: Currency;
   name?: string;
-  bankDetails: Record<string, unknown>;
+  destinationId: string;
 };
 
 export type TransferMoneyMessage = WebViewMessage & {

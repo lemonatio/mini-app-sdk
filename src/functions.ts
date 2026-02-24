@@ -249,18 +249,18 @@ export const authenticate = async ({
  * @param amount The amount to transfer
  * @param currency The fiat currency (e.g., 'ARS', 'PEN')
  * @param name Optional recipient name
- * @param bankDetails Bank details for the transfer
+ * @param destinationId The destination identifier for the transfer
  * @returns Promise that resolves with the transfer result
  */
 export const transferMoney = async ({
   amount,
   currency,
   name,
-  bankDetails,
+  destinationId,
 }: TransferMoneyData): Promise<TransferMoneyResponse> => {
   const message: TransferMoneyMessage = {
     action: WebViewAction.TRANSFER_MONEY,
-    data: { amount, currency, name, bankDetails },
+    data: { amount, currency, name, destinationId },
   };
 
   sendMessageToApp(message);
