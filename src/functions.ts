@@ -15,10 +15,13 @@ import {
   CallSmartContractData,
   AuthenticateData,
   WebViewMessage,
+  TransactionResult,
+  IsLemonWebViewResponse,
 } from './types';
 import { stringifyMessage } from './utils';
 
 /**
+ * @deprecated Use isLemonWebView instead. This one will become a private function.
  * Detects if the current environment is a React Native WebView.
  * It checks multiple indicators including the ReactNativeWebView object,
  * UserAgent string, and document class to determine if the app is running
@@ -37,17 +40,41 @@ export const isWebView = (): boolean => {
 };
 
 /**
+ * Detects if the current WebView is running inside Lemon's App.
+ * It sends a message to the app and waits for a response. Returns a promise, but should be instant.
+ * @returns { Promise<boolean> } True if running in Lemon's WebView, false otherwise
+ */
+export const isLemonWebView = async (): Promise<boolean> => {
+  if (!isWebView()) {
+    return false;
+  }
+
+  try {
+    sendMessageToApp({
+      action: WebViewAction.IS_LEMON_WEBVIEW,
+    });
+
+    const response = await waitForResponse<IsLemonWebViewResponse>(
+      ActionResponse.IS_LEMON_WEBVIEW_RESPONSE,
+      1000 // 1 second timeout. But this response takes ~1ms to return.
+    );
+
+    return response.result === TransactionResult.SUCCESS;
+  } catch {
+    return false;
+  }
+};
+
+/**
  * Sends a message to the native React Native app through the WebView.
  * @param message The message to send
  */
 const sendMessageToApp = <T extends WebViewMessage>(message: T): void => {
-  if (!isWebView()) {
-    throw new Error(`${message.action} can only be used inside a React Native WebView`);
-  }
-
-  // Needs to double check the window.ReactNativeWebView is available to avoid undefined errors
+  // Check if the window.ReactNativeWebView is available to avoid undefined errors
   if (typeof window !== 'undefined' && window.ReactNativeWebView) {
     window.ReactNativeWebView.postMessage(stringifyMessage(message));
+  } else {
+    throw new Error(`${message.action} can only be used inside a React Native WebView`);
   }
 };
 
@@ -124,14 +151,20 @@ export const deposit = async ({
  * Initiates a withdrawal transaction.
  * @param amount The amount to withdraw
  * @param tokenName The token name to withdraw (e.g. 'USDC', 'ETH')
+ * @param chainId The chain id to use
  * @returns Promise that resolves with the transaction hash
  */
-export const withdraw = async ({ amount, tokenName }: WithdrawData): Promise<WithdrawResponse> => {
+export const withdraw = async ({
+  amount,
+  tokenName,
+  chainId,
+}: WithdrawData): Promise<WithdrawResponse> => {
   const message: WithdrawMessage = {
     action: WebViewAction.WITHDRAW,
     data: {
       amount,
       tokenName,
+      chainId,
     },
   };
 
@@ -188,12 +221,14 @@ export const callSmartContract = async ({
 export const authenticate = async ({
   nonce,
   chainId,
-}: AuthenticateData = {}): Promise<AuthenticateResponse> => {
+  requirements,
+}: AuthenticateData): Promise<AuthenticateResponse> => {
   const message: AuthenticateMessage = {
     action: WebViewAction.AUTHENTICATE,
     data: {
       nonce,
       chainId,
+      requirements,
     },
   };
 

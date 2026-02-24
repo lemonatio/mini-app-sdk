@@ -1,5 +1,20 @@
-import { deposit, withdraw, callSmartContract, authenticate, isWebView } from '../src/functions';
-import { ChainId, WebViewAction, ActionResponse, TransactionResult, TokenName } from '../src/types';
+import {
+  deposit,
+  withdraw,
+  callSmartContract,
+  authenticate,
+  isWebView,
+  isLemonWebView,
+} from '../src/functions';
+import {
+  ChainId,
+  WebViewAction,
+  ActionResponse,
+  TransactionResult,
+  TokenName,
+  ClaimKey,
+} from '../src/types';
+import { stringifyMessage } from '../src/utils';
 
 // Mock window.ReactNativeWebView
 const mockPostMessage = jest.fn();
@@ -118,6 +133,75 @@ describe('Core SDK Functions', () => {
     });
   });
 
+  describe('isLemonWebView', () => {
+    it('should return false when not in a WebView', async () => {
+      setupWebViewEnvironment(false);
+      await expect(isLemonWebView()).resolves.toBe(false);
+    });
+
+    it('should return true when Lemon WebView responds with success', async () => {
+      const mockResponse = {
+        action: ActionResponse.IS_LEMON_WEBVIEW_RESPONSE,
+        result: TransactionResult.SUCCESS,
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const lemonPromise = isLemonWebView();
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.IS_LEMON_WEBVIEW,
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 10);
+
+      jest.advanceTimersByTime(10);
+
+      await expect(lemonPromise).resolves.toBe(true);
+    });
+
+    it('should return false when Lemon WebView responds with failure', async () => {
+      const mockResponse = {
+        action: ActionResponse.IS_LEMON_WEBVIEW_RESPONSE,
+        result: TransactionResult.FAILED,
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const lemonPromise = isLemonWebView();
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 10);
+
+      jest.advanceTimersByTime(10);
+
+      await expect(lemonPromise).resolves.toBe(false);
+    });
+
+    it('should return false on timeout', async () => {
+      const lemonPromise = isLemonWebView();
+
+      jest.advanceTimersByTime(1000);
+
+      await expect(lemonPromise).resolves.toBe(false);
+    });
+  });
+
   describe('deposit', () => {
     it('should send deposit message and wait for response', async () => {
       const mockResponse = {
@@ -144,7 +228,7 @@ describe('Core SDK Functions', () => {
 
       // Verify the message was sent
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.DEPOSIT,
           data: {
             amount: '100',
@@ -156,7 +240,7 @@ describe('Core SDK Functions', () => {
 
       // Simulate response
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -199,7 +283,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.DEPOSIT,
           data: {
             amount: '50',
@@ -210,7 +294,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -245,7 +329,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.DEPOSIT,
           data: {
             amount: '0',
@@ -256,7 +340,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -286,20 +370,25 @@ describe('Core SDK Functions', () => {
         }
       });
 
-      const withdrawPromise = withdraw({ amount: '50', tokenName: TokenName.ETH });
+      const withdrawPromise = withdraw({
+        amount: '50',
+        tokenName: TokenName.ETH,
+        chainId: ChainId.POLYGON_AMOY,
+      });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.WITHDRAW,
           data: {
             amount: '50',
             tokenName: TokenName.ETH,
+            chainId: ChainId.POLYGON_AMOY,
           },
         })
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -314,9 +403,9 @@ describe('Core SDK Functions', () => {
     it('should throw error when not in WebView', async () => {
       setupWebViewEnvironment(false);
 
-      await expect(withdraw({ amount: '50', tokenName: TokenName.ETH })).rejects.toThrow(
-        'WITHDRAW can only be used inside a React Native WebView'
-      );
+      await expect(
+        withdraw({ amount: '50', tokenName: TokenName.ETH, chainId: ChainId.POLYGON_AMOY })
+      ).rejects.toThrow('WITHDRAW can only be used inside a React Native WebView');
     });
 
     it('should handle different address formats', async () => {
@@ -335,20 +424,25 @@ describe('Core SDK Functions', () => {
         }
       });
 
-      const withdrawPromise = withdraw({ amount: '100', tokenName: TokenName.USDC });
+      const withdrawPromise = withdraw({
+        amount: '100',
+        tokenName: TokenName.USDC,
+        chainId: ChainId.POLYGON_AMOY,
+      });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.WITHDRAW,
           data: {
             amount: '100',
             tokenName: TokenName.USDC,
+            chainId: ChainId.POLYGON_AMOY,
           },
         })
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -391,7 +485,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
             contracts: [
@@ -408,7 +502,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -449,7 +543,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
             contracts: [
@@ -466,7 +560,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -527,7 +621,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
             contracts: [
@@ -544,7 +638,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -590,7 +684,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
             contracts: [
@@ -609,7 +703,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -653,7 +747,7 @@ describe('Core SDK Functions', () => {
       });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.CALL_SMART_CONTRACT,
           data: {
             contracts: [
@@ -671,7 +765,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -707,7 +801,7 @@ describe('Core SDK Functions', () => {
       const authPromise = authenticate({ nonce: 'test-nonce-123', chainId: ChainId.POLYGON_AMOY });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.AUTHENTICATE,
           data: {
             nonce: 'test-nonce-123',
@@ -717,7 +811,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -763,7 +857,7 @@ describe('Core SDK Functions', () => {
       const authPromise = authenticate({ nonce: longNonce, chainId: ChainId.POLYGON_AMOY });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
-        JSON.stringify({
+        stringifyMessage({
           action: WebViewAction.AUTHENTICATE,
           data: {
             nonce: longNonce,
@@ -773,7 +867,7 @@ describe('Core SDK Functions', () => {
       );
 
       setTimeout(() => {
-        messageHandler(new MessageEvent('message', { data: JSON.stringify(mockResponse) }));
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
       }, 100);
 
       jest.advanceTimersByTime(100);
@@ -786,6 +880,332 @@ describe('Core SDK Functions', () => {
         expect(result.data.signature).toBe('0xSignature...');
         expect(result.data.message).toBe('Custom authentication message');
       }
+    });
+  });
+
+  describe('authenticate with requirements', () => {
+    it('should send requirements with claims in the authenticate message', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          wallet: '0x3A3399721eeC94E88EB1104325E46bf4BdA67366' as const,
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG],
+          signature: '0xSignature...' as const,
+          message: 'Sign in with Ethereum',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG],
+        },
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.AUTHENTICATE,
+          data: {
+            nonce: 'test1234',
+            chainId: ChainId.BASE_SEPOLIA,
+            requirements: {
+              claims: [ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG],
+            },
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+      if (result.result === TransactionResult.SUCCESS) {
+        expect(result.data.wallet).toBe('0x3A3399721eeC94E88EB1104325E46bf4BdA67366');
+        expect(result.data.claims).toEqual([ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG]);
+        expect(result.data.signature).toBe('0xSignature...');
+        expect(result.data.message).toBe('Sign in with Ethereum');
+      }
+    });
+
+    it('should send requirements with permissions in the authenticate message', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          wallet: '0xSafeAddress...' as const,
+          claims: [],
+          signature: '0xSig...' as const,
+          message: 'Sign in with Ethereum',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {
+          permissions: ['CAMERA', 'LOCATION'],
+        },
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.AUTHENTICATE,
+          data: {
+            nonce: 'test1234',
+            chainId: ChainId.BASE_SEPOLIA,
+            requirements: {
+              permissions: ['CAMERA', 'LOCATION'],
+            },
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+    });
+
+    it('should send requirements with both claims and permissions', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          wallet: '0xSafeAddress...' as const,
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL],
+          signature: '0xSig...' as const,
+          message: 'Sign in with Ethereum',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL],
+          permissions: ['CAMERA'],
+        },
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.AUTHENTICATE,
+          data: {
+            nonce: 'test1234',
+            chainId: ChainId.BASE_SEPOLIA,
+            requirements: {
+              claims: [ClaimKey.NAME, ClaimKey.EMAIL],
+              permissions: ['CAMERA'],
+            },
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+      if (result.result === TransactionResult.SUCCESS) {
+        expect(result.data.claims).toEqual([ClaimKey.NAME, ClaimKey.EMAIL]);
+      }
+    });
+
+    it('should handle authenticate without requirements and return empty claims', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          wallet: '0x3A3399721eeC94E88EB1104325E46bf4BdA67366' as const,
+          claims: [],
+          signature: '0xSig...' as const,
+          message: 'Sign in with Ethereum',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.AUTHENTICATE,
+          data: {
+            nonce: 'test1234',
+            chainId: ChainId.BASE_SEPOLIA,
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+      if (result.result === TransactionResult.SUCCESS) {
+        expect(result.data.claims).toEqual([]);
+      }
+    });
+
+    it('should handle FAILED result when requirements are pending', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.FAILED,
+        error: {
+          code: 'REQUIREMENTS_PENDING',
+          message: 'User has not confirmed the required claims',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG],
+        },
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.FAILED);
+      if (result.result === TransactionResult.FAILED) {
+        expect(result.error.code).toBe('REQUIREMENTS_PENDING');
+        expect(result.error.message).toBe('User has not confirmed the required claims');
+      }
+    });
+
+    it('should handle CANCELLED result when user rejects requirements', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.CANCELLED,
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {
+          claims: [ClaimKey.NAME, ClaimKey.EMAIL],
+        },
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.CANCELLED);
+    });
+
+    it('should send empty requirements object when provided', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          wallet: '0xSafeAddress...' as const,
+          claims: [],
+          signature: '0xSig...' as const,
+          message: 'Sign in with Ethereum',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: {},
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.AUTHENTICATE,
+          data: {
+            nonce: 'test1234',
+            chainId: ChainId.BASE_SEPOLIA,
+            requirements: {},
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
     });
   });
 
@@ -806,6 +1226,9 @@ describe('Core SDK Functions', () => {
     });
 
     it('should handle malformed response', () => {
+      // Mock console.log to silence expected error logs
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
       let messageHandler: MessageEventHandler;
       mockAddEventListener.mockImplementation((event, handler) => {
         if (event === 'message') {
@@ -828,9 +1251,15 @@ describe('Core SDK Functions', () => {
 
       // Should still be waiting for valid response
       expect(depositPromise).toBeDefined();
+
+      // Restore console.log
+      consoleSpy.mockRestore();
     });
 
     it('should handle wrong response action', () => {
+      // Mock console.log to silence expected error logs
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
       let messageHandler: MessageEventHandler;
       mockAddEventListener.mockImplementation((event, handler) => {
         if (event === 'message') {
@@ -848,7 +1277,7 @@ describe('Core SDK Functions', () => {
       setTimeout(() => {
         messageHandler(
           new MessageEvent('message', {
-            data: JSON.stringify({
+            data: stringifyMessage({
               action: 'WRONG_ACTION',
               result: TransactionResult.SUCCESS,
               txHash: '0x123...',
@@ -861,6 +1290,9 @@ describe('Core SDK Functions', () => {
 
       // Should still be waiting for correct response
       expect(depositPromise).toBeDefined();
+
+      // Restore console.log
+      consoleSpy.mockRestore();
     });
   });
 });

@@ -1,5 +1,12 @@
 // Core SDK functions
-export { deposit, withdraw, callSmartContract, authenticate, isWebView } from './functions';
+export {
+  isLemonWebView,
+  isWebView,
+  authenticate,
+  deposit,
+  withdraw,
+  callSmartContract,
+} from './functions';
 
 // Types
 export type {
@@ -26,6 +33,7 @@ export type {
   ContractParams,
 
   // App to WebView response types
+  IsLemonWebViewResponse,
   AuthenticateResponse,
   DepositResponse,
   WithdrawResponse,
