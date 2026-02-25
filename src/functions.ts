@@ -260,7 +260,7 @@ export const transferMoney = async ({
 }: TransferMoneyData): Promise<TransferMoneyResponse> => {
   const message: TransferMoneyMessage = {
     action: WebViewAction.TRANSFER_MONEY,
-    data: { amount, currency, name, paymentDestinationInformation },
+    data: { amount, currency, ...(name && { name }), paymentDestinationInformation },
   };
 
   sendMessageToApp(message);

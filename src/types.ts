@@ -284,7 +284,7 @@ export type TransferMoneyResponse = AppMessage &
     | {
         action: ActionResponse.TRANSFER_MONEY_RESPONSE;
         result: TransactionResult.PENDING;
-        data: { txHash: string };
+        data: { transactionId: string };
       }
   );
 

@@ -1454,7 +1454,7 @@ describe('Core SDK Functions', () => {
         action: ActionResponse.TRANSFER_MONEY_RESPONSE,
         result: TransactionResult.PENDING,
         data: {
-          txHash: 'txpendingabc123',
+          transactionId: 'txpendingabc123',
         },
       };
 
@@ -1480,7 +1480,7 @@ describe('Core SDK Functions', () => {
       const result = await transferPromise;
       expect(result.result).toBe(TransactionResult.PENDING);
       if (result.result === TransactionResult.PENDING) {
-        expect(result.data.txHash).toBe('txpendingabc123');
+        expect(result.data.transactionId).toBe('txpendingabc123');
       }
     });
 
@@ -1544,6 +1544,21 @@ describe('Core SDK Functions', () => {
 
       await expect(depositPromise).rejects.toThrow(
         `Timeout, 60s passed waiting for ${ActionResponse.DEPOSIT_RESPONSE} response.`
+      );
+    });
+
+    it('should handle timeout for transferMoney', async () => {
+      const transferMoneyPromise = transferMoney({
+        amount: '100',
+        currency: Currency.ARS,
+        paymentDestinationInformation: { paymentId: 'dest-123' },
+      });
+
+      // Don't send response, let it timeout
+      jest.advanceTimersByTime(60000);
+
+      await expect(transferMoneyPromise).rejects.toThrow(
+        `Timeout, 60s passed waiting for ${ActionResponse.TRANSFER_MONEY_RESPONSE} response.`
       );
     });
 
