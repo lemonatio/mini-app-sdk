@@ -308,6 +308,41 @@ describe('Core SDK Functions', () => {
       }
     });
 
+    it('should handle PENDING response', async () => {
+      const mockResponse = {
+        action: ActionResponse.DEPOSIT_RESPONSE,
+        result: TransactionResult.PENDING,
+        data: {
+          txHash: '0xpending123...',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const depositPromise = deposit({
+        amount: '100',
+        tokenName: TokenName.USDC,
+        chainId: ChainId.POLYGON_AMOY,
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await depositPromise;
+      expect(result.result).toBe(TransactionResult.PENDING);
+      if (result.result === TransactionResult.PENDING) {
+        expect(result.data.txHash).toBe('0xpending123...');
+      }
+    });
+
     it('should handle zero amount', async () => {
       const mockResponse = {
         action: ActionResponse.DEPOSIT_RESPONSE,
@@ -408,6 +443,41 @@ describe('Core SDK Functions', () => {
       await expect(
         withdraw({ amount: '50', tokenName: TokenName.ETH, chainId: ChainId.POLYGON_AMOY })
       ).rejects.toThrow('WITHDRAW can only be used inside a React Native WebView');
+    });
+
+    it('should handle PENDING response', async () => {
+      const mockResponse = {
+        action: ActionResponse.WITHDRAW_RESPONSE,
+        result: TransactionResult.PENDING,
+        data: {
+          txHash: '0xpending456...',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const withdrawPromise = withdraw({
+        amount: '50',
+        tokenName: TokenName.ETH,
+        chainId: ChainId.POLYGON_AMOY,
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await withdrawPromise;
+      expect(result.result).toBe(TransactionResult.PENDING);
+      if (result.result === TransactionResult.PENDING) {
+        expect(result.data.txHash).toBe('0xpending456...');
+      }
     });
 
     it('should handle different address formats', async () => {
@@ -513,6 +583,47 @@ describe('Core SDK Functions', () => {
       expect(result.result).toBe(TransactionResult.SUCCESS);
       if (result.result === TransactionResult.SUCCESS) {
         expect(result.data.txHash).toBe('0x789...');
+      }
+    });
+
+    it('should handle PENDING response', async () => {
+      const mockResponse = {
+        action: ActionResponse.CALL_SMART_CONTRACT_RESPONSE,
+        result: TransactionResult.PENDING,
+        data: {
+          txHash: '0xpending789...',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const contractPromise = callSmartContract({
+        contracts: [
+          {
+            contractAddress: '0xContract...',
+            functionName: 'transfer',
+            functionParams: ['0xRecipient...', '1000000000000000000'],
+            chainId: ChainId.POLYGON_AMOY,
+            value: '0.001',
+          },
+        ],
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await contractPromise;
+      expect(result.result).toBe(TransactionResult.PENDING);
+      if (result.result === TransactionResult.PENDING) {
+        expect(result.data.txHash).toBe('0xpending789...');
       }
     });
 
@@ -1336,6 +1447,41 @@ describe('Core SDK Functions', () => {
 
       const result = await transferPromise;
       expect(result.result).toBe(TransactionResult.CANCELLED);
+    });
+
+    it('should handle PENDING response', async () => {
+      const mockResponse = {
+        action: ActionResponse.TRANSFER_MONEY_RESPONSE,
+        result: TransactionResult.PENDING,
+        data: {
+          txHash: 'txpendingabc123',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const transferPromise = transferMoney({
+        amount: '1000',
+        currency: Currency.ARS,
+        paymentDestinationInformation: { paymentId: 'dest-123' },
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await transferPromise;
+      expect(result.result).toBe(TransactionResult.PENDING);
+      if (result.result === TransactionResult.PENDING) {
+        expect(result.data.txHash).toBe('txpendingabc123');
+      }
     });
 
     it('should send message without optional name field', async () => {
