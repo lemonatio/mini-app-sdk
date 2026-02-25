@@ -34,6 +34,7 @@ export type {
   CallSmartContractData,
   ContractParams,
   TransferMoneyData,
+  PaymentDestinationInformation,
 
   // App to WebView response types
   IsLemonWebViewResponse,

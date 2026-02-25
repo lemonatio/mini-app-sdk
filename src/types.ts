@@ -85,11 +85,16 @@ export type CallSmartContractMessage = WebViewMessage & {
   data: CallSmartContractData;
 };
 
+export type PaymentDestinationInformation = {
+  paymentId: string;
+  [key: string]: unknown;
+};
+
 export type TransferMoneyData = {
   amount: string;
   currency: Currency;
   name?: string;
-  destinationId: string;
+  paymentDestinationInformation: PaymentDestinationInformation;
 };
 
 export type TransferMoneyMessage = WebViewMessage & {
