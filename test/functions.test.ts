@@ -1454,7 +1454,7 @@ describe('Core SDK Functions', () => {
         action: ActionResponse.TRANSFER_MONEY_RESPONSE,
         result: TransactionResult.PENDING,
         data: {
-          transactionId: 'txpendingabc123',
+          transferId: 'txpendingabc123',
         },
       };
 
@@ -1480,7 +1480,7 @@ describe('Core SDK Functions', () => {
       const result = await transferPromise;
       expect(result.result).toBe(TransactionResult.PENDING);
       if (result.result === TransactionResult.PENDING) {
-        expect(result.data.transactionId).toBe('txpendingabc123');
+        expect(result.data.transferId).toBe('txpendingabc123');
       }
     });
 
