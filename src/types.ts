@@ -137,6 +137,11 @@ export enum ClaimKey {
   OPERATION_COUNTRY = 'OPERATION_COUNTRY',
 }
 
+export interface MiniAppGrantedClaim {
+  key: ClaimKey;
+  value: string;
+}
+
 export type AppMessage = {
   action: ActionResponse;
   result: TransactionResult;
@@ -154,7 +159,7 @@ export type AuthenticateResponse = AppMessage &
         result: TransactionResult.SUCCESS;
         data: {
           wallet: Address;
-          claims: ClaimKey[];
+          grantedClaims: MiniAppGrantedClaim[];
           signature: Hex;
           message: string;
         };

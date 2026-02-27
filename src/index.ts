@@ -41,6 +41,9 @@ export type {
 
   // Permit2 types
   Permit,
+
+  // Claim types
+  MiniAppGrantedClaim,
 } from './types';
 
 // Enums
