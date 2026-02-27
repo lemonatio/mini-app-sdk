@@ -785,7 +785,10 @@ describe('Core SDK Functions', () => {
         result: TransactionResult.SUCCESS,
         data: {
           wallet: '0xSafe...',
-          claims: ['claim1', 'claim2'],
+          grantedClaims: [
+            { key: 'claim1', value: 'value1' },
+            { key: 'claim2', value: 'value2' },
+          ],
           signature: '0xSig...',
           message: 'Sign this message',
         },
@@ -820,7 +823,10 @@ describe('Core SDK Functions', () => {
       expect(result.result).toBe(TransactionResult.SUCCESS);
       if (result.result === TransactionResult.SUCCESS) {
         expect(result.data.wallet).toBe('0xSafe...');
-        expect(result.data.claims).toEqual(['claim1', 'claim2']);
+        expect(result.data.grantedClaims).toEqual([
+          { key: 'claim1', value: 'value1' },
+          { key: 'claim2', value: 'value2' },
+        ]);
         expect(result.data.signature).toBe('0xSig...');
         expect(result.data.message).toBe('Sign this message');
       }
@@ -840,7 +846,10 @@ describe('Core SDK Functions', () => {
         result: TransactionResult.SUCCESS,
         data: {
           wallet: '0xSafeAddress...',
-          claims: ['admin', 'user'],
+          grantedClaims: [
+            { key: 'admin', value: 'admin-value' },
+            { key: 'user', value: 'user-value' },
+          ],
           signature: '0xSignature...',
           message: 'Custom authentication message',
         },
@@ -876,7 +885,10 @@ describe('Core SDK Functions', () => {
       expect(result.result).toBe(TransactionResult.SUCCESS);
       if (result.result === TransactionResult.SUCCESS) {
         expect(result.data.wallet).toBe('0xSafeAddress...');
-        expect(result.data.claims).toEqual(['admin', 'user']);
+        expect(result.data.grantedClaims).toEqual([
+          { key: 'admin', value: 'admin-value' },
+          { key: 'user', value: 'user-value' },
+        ]);
         expect(result.data.signature).toBe('0xSignature...');
         expect(result.data.message).toBe('Custom authentication message');
       }
@@ -890,7 +902,11 @@ describe('Core SDK Functions', () => {
         result: TransactionResult.SUCCESS,
         data: {
           wallet: '0x3A3399721eeC94E88EB1104325E46bf4BdA67366' as const,
-          claims: [ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG],
+          grantedClaims: [
+            { key: ClaimKey.NAME, value: 'John' },
+            { key: ClaimKey.EMAIL, value: 'john@example.com' },
+            { key: ClaimKey.LEMONTAG, value: 'johndoe' },
+          ],
           signature: '0xSignature...' as const,
           message: 'Sign in with Ethereum',
         },
@@ -934,7 +950,11 @@ describe('Core SDK Functions', () => {
       expect(result.result).toBe(TransactionResult.SUCCESS);
       if (result.result === TransactionResult.SUCCESS) {
         expect(result.data.wallet).toBe('0x3A3399721eeC94E88EB1104325E46bf4BdA67366');
-        expect(result.data.claims).toEqual([ClaimKey.NAME, ClaimKey.EMAIL, ClaimKey.LEMONTAG]);
+        expect(result.data.grantedClaims).toEqual([
+          { key: ClaimKey.NAME, value: 'John' },
+          { key: ClaimKey.EMAIL, value: 'john@example.com' },
+          { key: ClaimKey.LEMONTAG, value: 'johndoe' },
+        ]);
         expect(result.data.signature).toBe('0xSignature...');
         expect(result.data.message).toBe('Sign in with Ethereum');
       }
@@ -946,7 +966,7 @@ describe('Core SDK Functions', () => {
         result: TransactionResult.SUCCESS,
         data: {
           wallet: '0xSafeAddress...' as const,
-          claims: [],
+          grantedClaims: [],
           signature: '0xSig...' as const,
           message: 'Sign in with Ethereum',
         },
@@ -996,7 +1016,10 @@ describe('Core SDK Functions', () => {
         result: TransactionResult.SUCCESS,
         data: {
           wallet: '0xSafeAddress...' as const,
-          claims: [ClaimKey.NAME, ClaimKey.EMAIL],
+          grantedClaims: [
+            { key: ClaimKey.NAME, value: 'John' },
+            { key: ClaimKey.EMAIL, value: 'john@example.com' },
+          ],
           signature: '0xSig...' as const,
           message: 'Sign in with Ethereum',
         },
@@ -1041,7 +1064,10 @@ describe('Core SDK Functions', () => {
       const result = await authPromise;
       expect(result.result).toBe(TransactionResult.SUCCESS);
       if (result.result === TransactionResult.SUCCESS) {
-        expect(result.data.claims).toEqual([ClaimKey.NAME, ClaimKey.EMAIL]);
+        expect(result.data.grantedClaims).toEqual([
+          { key: ClaimKey.NAME, value: 'John' },
+          { key: ClaimKey.EMAIL, value: 'john@example.com' },
+        ]);
       }
     });
 
@@ -1051,7 +1077,7 @@ describe('Core SDK Functions', () => {
         result: TransactionResult.SUCCESS,
         data: {
           wallet: '0x3A3399721eeC94E88EB1104325E46bf4BdA67366' as const,
-          claims: [],
+          grantedClaims: [],
           signature: '0xSig...' as const,
           message: 'Sign in with Ethereum',
         },
@@ -1088,7 +1114,7 @@ describe('Core SDK Functions', () => {
       const result = await authPromise;
       expect(result.result).toBe(TransactionResult.SUCCESS);
       if (result.result === TransactionResult.SUCCESS) {
-        expect(result.data.claims).toEqual([]);
+        expect(result.data.grantedClaims).toEqual([]);
       }
     });
 
@@ -1168,7 +1194,7 @@ describe('Core SDK Functions', () => {
         result: TransactionResult.SUCCESS,
         data: {
           wallet: '0xSafeAddress...' as const,
-          claims: [],
+          grantedClaims: [],
           signature: '0xSig...' as const,
           message: 'Sign in with Ethereum',
         },
