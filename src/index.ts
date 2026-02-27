@@ -57,4 +57,5 @@ export {
   TokenName,
   ContractStandard,
   Currency,
+  ClaimKey,
 } from './types';
