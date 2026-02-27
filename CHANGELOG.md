@@ -1,5 +1,17 @@
 
 
+## [0.1.13](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.12...v0.1.13) (2026-02-27)
+
+
+### Bug Fixes
+
+* restore previous version in package.json ([182eedc](https://github.com/lemonatio/mini-app-sdk/commit/182eedcb8d844a831023c777a2e9c208be11b20e))
+
+
+### Features
+
+* **sdk:** export ClaimKey enum publicly ([#38](https://github.com/lemonatio/mini-app-sdk/issues/38)) ([cc4ea04](https://github.com/lemonatio/mini-app-sdk/commit/cc4ea04b9e7079974031f59ba592a54fb0e93519))
+
 ## [0.1.12](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.11...v0.1.12) (2026-02-19)
 
 
