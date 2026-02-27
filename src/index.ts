@@ -51,4 +51,5 @@ export {
   TransactionResult,
   TokenName,
   ContractStandard,
+  ClaimKey,
 } from './types';
