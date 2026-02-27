@@ -1,5 +1,12 @@
 
 
+## [0.1.14](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.13...v0.1.14) (2026-02-27)
+
+
+### Bug Fixes
+
+* **auth:** use grantedClaims with key-value pairs in AuthenticateResponse ([#44](https://github.com/lemonatio/mini-app-sdk/issues/44)) ([c166622](https://github.com/lemonatio/mini-app-sdk/commit/c1666220f90ba6cdd6a16a81aedb520c456a5701))
+
 ## [0.1.13](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.12...v0.1.13) (2026-02-27)
 
 
