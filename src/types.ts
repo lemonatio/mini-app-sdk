@@ -126,6 +126,7 @@ export enum TransactionResult {
   SUCCESS = 'SUCCESS',
   FAILED = 'FAILED',
   CANCELLED = 'CANCELLED',
+  PENDING = 'PENDING',
 }
 
 export enum ClaimKey {
@@ -179,7 +180,7 @@ export type DepositResponse = AppMessage &
   (
     | {
         action: ActionResponse.DEPOSIT_RESPONSE;
-        result: TransactionResult.SUCCESS;
+        result: TransactionResult.SUCCESS | TransactionResult.PENDING;
         data: {
           txHash: Hex;
         };
@@ -199,7 +200,7 @@ export type WithdrawResponse = AppMessage &
   (
     | {
         action: ActionResponse.WITHDRAW_RESPONSE;
-        result: TransactionResult.SUCCESS;
+        result: TransactionResult.SUCCESS | TransactionResult.PENDING;
         data: {
           txHash: Hex;
         };
@@ -219,7 +220,7 @@ export type CallSmartContractResponse = AppMessage &
   (
     | {
         action: ActionResponse.CALL_SMART_CONTRACT_RESPONSE;
-        result: TransactionResult.SUCCESS;
+        result: TransactionResult.SUCCESS | TransactionResult.PENDING;
         data: {
           txHash: Hex;
         };
