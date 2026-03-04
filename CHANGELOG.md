@@ -1,5 +1,12 @@
 
 
+## [0.1.15](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.14...v0.1.15) (2026-03-03)
+
+
+### Features
+
+* add PENDING TransactionResult ([e70807d](https://github.com/lemonatio/mini-app-sdk/commit/e70807dd150d5f74c756f1fc846f4f0f921426a2))
+
 ## [0.1.14](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.13...v0.1.14) (2026-02-27)
 
 
