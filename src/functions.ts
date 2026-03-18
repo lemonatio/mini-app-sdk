@@ -4,16 +4,19 @@ import {
   WithdrawMessage,
   CallSmartContractMessage,
   AuthenticateMessage,
+  TransferMoneyMessage,
   DepositResponse,
   WithdrawResponse,
   CallSmartContractResponse,
   AuthenticateResponse,
+  TransferMoneyResponse,
   AppMessage,
   ActionResponse,
   DepositData,
   WithdrawData,
   CallSmartContractData,
   AuthenticateData,
+  TransferMoneyData,
   WebViewMessage,
   TransactionResult,
   IsLemonWebViewResponse,
@@ -236,6 +239,34 @@ export const authenticate = async ({
 
   const response = await waitForResponse<AuthenticateResponse>(
     ActionResponse.AUTHENTICATE_RESPONSE
+  );
+
+  return response;
+};
+
+/**
+ * Initiates a fiat money transfer.
+ * @param amount The amount to transfer
+ * @param currency The fiat currency (e.g., 'ARS', 'PEN')
+ * @param name Optional recipient name
+ * @param paymentDestinationInformation The payment destination information containing paymentId and optional additional attributes
+ * @returns Promise that resolves with the transfer result
+ */
+export const transferMoney = async ({
+  amount,
+  currency,
+  name,
+  paymentDestinationInformation,
+}: TransferMoneyData): Promise<TransferMoneyResponse> => {
+  const message: TransferMoneyMessage = {
+    action: WebViewAction.TRANSFER_MONEY,
+    data: { amount, currency, name, paymentDestinationInformation },
+  };
+
+  sendMessageToApp(message);
+
+  const response = await waitForResponse<TransferMoneyResponse>(
+    ActionResponse.TRANSFER_MONEY_RESPONSE
   );
 
   return response;
