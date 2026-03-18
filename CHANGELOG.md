@@ -1,5 +1,13 @@
 
 
+## [0.1.16](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.15...v0.1.16) (2026-03-18)
+
+
+### Features
+
+* add transferMoney function for fiat money transfers ([#36](https://github.com/lemonatio/mini-app-sdk/issues/36)) ([e1988cc](https://github.com/lemonatio/mini-app-sdk/commit/e1988cc8a082cbe11663dabb05604d1d80c25690))
+
+
 ## [0.1.15](https://github.com/lemonatio/mini-app-sdk/compare/v0.1.14...v0.1.15) (2026-03-03)
 
 
