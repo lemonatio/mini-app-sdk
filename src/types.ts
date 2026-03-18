@@ -194,7 +194,7 @@ export type DepositResponse = AppMessage &
   (
     | {
         action: ActionResponse.DEPOSIT_RESPONSE;
-        result: TransactionResult.SUCCESS;
+        result: TransactionResult.SUCCESS | TransactionResult.PENDING;
         data: {
           txHash: Hex;
         };
@@ -207,11 +207,6 @@ export type DepositResponse = AppMessage &
     | {
         action: ActionResponse.DEPOSIT_RESPONSE;
         result: TransactionResult.CANCELLED;
-      }
-    | {
-        action: ActionResponse.DEPOSIT_RESPONSE;
-        result: TransactionResult.PENDING;
-        data: { txHash: Hex };
       }
   );
 
@@ -219,7 +214,7 @@ export type WithdrawResponse = AppMessage &
   (
     | {
         action: ActionResponse.WITHDRAW_RESPONSE;
-        result: TransactionResult.SUCCESS;
+        result: TransactionResult.SUCCESS | TransactionResult.PENDING;
         data: {
           txHash: Hex;
         };
@@ -232,11 +227,6 @@ export type WithdrawResponse = AppMessage &
     | {
         action: ActionResponse.WITHDRAW_RESPONSE;
         result: TransactionResult.CANCELLED;
-      }
-    | {
-        action: ActionResponse.WITHDRAW_RESPONSE;
-        result: TransactionResult.PENDING;
-        data: { txHash: Hex };
       }
   );
 
@@ -244,7 +234,7 @@ export type CallSmartContractResponse = AppMessage &
   (
     | {
         action: ActionResponse.CALL_SMART_CONTRACT_RESPONSE;
-        result: TransactionResult.SUCCESS;
+        result: TransactionResult.SUCCESS | TransactionResult.PENDING;
         data: {
           txHash: Hex;
         };
@@ -258,18 +248,13 @@ export type CallSmartContractResponse = AppMessage &
         action: ActionResponse.CALL_SMART_CONTRACT_RESPONSE;
         result: TransactionResult.CANCELLED;
       }
-    | {
-        action: ActionResponse.CALL_SMART_CONTRACT_RESPONSE;
-        result: TransactionResult.PENDING;
-        data: { txHash: Hex };
-      }
   );
 
 export type TransferMoneyResponse = AppMessage &
   (
     | {
         action: ActionResponse.TRANSFER_MONEY_RESPONSE;
-        result: TransactionResult.SUCCESS;
+        result: TransactionResult.SUCCESS | TransactionResult.PENDING;
         data: { transferId: string };
       }
     | {
@@ -280,11 +265,6 @@ export type TransferMoneyResponse = AppMessage &
     | {
         action: ActionResponse.TRANSFER_MONEY_RESPONSE;
         result: TransactionResult.CANCELLED;
-      }
-    | {
-        action: ActionResponse.TRANSFER_MONEY_RESPONSE;
-        result: TransactionResult.PENDING;
-        data: { transferId: string };
       }
   );
 
