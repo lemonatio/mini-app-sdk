@@ -3,6 +3,7 @@ import {
   withdraw,
   callSmartContract,
   authenticate,
+  transferMoney,
   isWebView,
   isLemonWebView,
 } from '../src/functions';
@@ -13,6 +14,7 @@ import {
   TransactionResult,
   TokenName,
   ClaimKey,
+  Currency,
 } from '../src/types';
 import { stringifyMessage } from '../src/utils';
 
@@ -306,6 +308,41 @@ describe('Core SDK Functions', () => {
       }
     });
 
+    it('should handle PENDING response', async () => {
+      const mockResponse = {
+        action: ActionResponse.DEPOSIT_RESPONSE,
+        result: TransactionResult.PENDING,
+        data: {
+          txHash: '0xpending123...',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const depositPromise = deposit({
+        amount: '100',
+        tokenName: TokenName.USDC,
+        chainId: ChainId.POLYGON_AMOY,
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await depositPromise;
+      expect(result.result).toBe(TransactionResult.PENDING);
+      if (result.result === TransactionResult.PENDING) {
+        expect(result.data.txHash).toBe('0xpending123...');
+      }
+    });
+
     it('should handle zero amount', async () => {
       const mockResponse = {
         action: ActionResponse.DEPOSIT_RESPONSE,
@@ -406,6 +443,41 @@ describe('Core SDK Functions', () => {
       await expect(
         withdraw({ amount: '50', tokenName: TokenName.ETH, chainId: ChainId.POLYGON_AMOY })
       ).rejects.toThrow('WITHDRAW can only be used inside a React Native WebView');
+    });
+
+    it('should handle PENDING response', async () => {
+      const mockResponse = {
+        action: ActionResponse.WITHDRAW_RESPONSE,
+        result: TransactionResult.PENDING,
+        data: {
+          txHash: '0xpending456...',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const withdrawPromise = withdraw({
+        amount: '50',
+        tokenName: TokenName.ETH,
+        chainId: ChainId.POLYGON_AMOY,
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await withdrawPromise;
+      expect(result.result).toBe(TransactionResult.PENDING);
+      if (result.result === TransactionResult.PENDING) {
+        expect(result.data.txHash).toBe('0xpending456...');
+      }
     });
 
     it('should handle different address formats', async () => {
@@ -511,6 +583,47 @@ describe('Core SDK Functions', () => {
       expect(result.result).toBe(TransactionResult.SUCCESS);
       if (result.result === TransactionResult.SUCCESS) {
         expect(result.data.txHash).toBe('0x789...');
+      }
+    });
+
+    it('should handle PENDING response', async () => {
+      const mockResponse = {
+        action: ActionResponse.CALL_SMART_CONTRACT_RESPONSE,
+        result: TransactionResult.PENDING,
+        data: {
+          txHash: '0xpending789...',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const contractPromise = callSmartContract({
+        contracts: [
+          {
+            contractAddress: '0xContract...',
+            functionName: 'transfer',
+            functionParams: ['0xRecipient...', '1000000000000000000'],
+            chainId: ChainId.POLYGON_AMOY,
+            value: '0.001',
+          },
+        ],
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await contractPromise;
+      expect(result.result).toBe(TransactionResult.PENDING);
+      if (result.result === TransactionResult.PENDING) {
+        expect(result.data.txHash).toBe('0xpending789...');
       }
     });
 
@@ -1235,6 +1348,215 @@ describe('Core SDK Functions', () => {
     });
   });
 
+  describe('transferMoney', () => {
+    it('should send transfer money message and wait for response', async () => {
+      const mockResponse = {
+        action: ActionResponse.TRANSFER_MONEY_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          transferId: 'transfer-123',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const transferPromise = transferMoney({
+        amount: '1000',
+        currency: Currency.ARS,
+        name: 'John Doe',
+        paymentDestinationInformation: { paymentId: 'dest-123' },
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.TRANSFER_MONEY,
+          data: {
+            amount: '1000',
+            currency: Currency.ARS,
+            name: 'John Doe',
+            paymentDestinationInformation: { paymentId: 'dest-123' },
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await transferPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+      if (result.result === TransactionResult.SUCCESS) {
+        expect(result.data.transferId).toBe('transfer-123');
+      }
+    });
+
+    it('should throw error when not in WebView', async () => {
+      setupWebViewEnvironment(false);
+
+      await expect(
+        transferMoney({
+          amount: '1000',
+          currency: Currency.ARS,
+          paymentDestinationInformation: { paymentId: 'dest-123' },
+        })
+      ).rejects.toThrow('TRANSFER_MONEY can only be used inside a React Native WebView');
+    });
+
+    it('should handle FAILED response', async () => {
+      const mockResponse = {
+        action: ActionResponse.TRANSFER_MONEY_RESPONSE,
+        result: TransactionResult.FAILED,
+        error: {
+          code: 'INSUFFICIENT_FUNDS',
+          message: 'Not enough balance to complete the transfer',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const transferPromise = transferMoney({
+        amount: '1000',
+        currency: Currency.ARS,
+        paymentDestinationInformation: { paymentId: 'dest-123' },
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await transferPromise;
+      expect(result.result).toBe(TransactionResult.FAILED);
+      if (result.result === TransactionResult.FAILED) {
+        expect(result.error.code).toBe('INSUFFICIENT_FUNDS');
+        expect(result.error.message).toBe('Not enough balance to complete the transfer');
+      }
+    });
+
+    it('should handle CANCELLED response', async () => {
+      const mockResponse = {
+        action: ActionResponse.TRANSFER_MONEY_RESPONSE,
+        result: TransactionResult.CANCELLED,
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const transferPromise = transferMoney({
+        amount: '500',
+        currency: Currency.PEN,
+        paymentDestinationInformation: { paymentId: 'dest-456' },
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await transferPromise;
+      expect(result.result).toBe(TransactionResult.CANCELLED);
+    });
+
+    it('should handle PENDING response', async () => {
+      const mockResponse = {
+        action: ActionResponse.TRANSFER_MONEY_RESPONSE,
+        result: TransactionResult.PENDING,
+        data: {
+          transferId: 'txpendingabc123',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const transferPromise = transferMoney({
+        amount: '1000',
+        currency: Currency.ARS,
+        paymentDestinationInformation: { paymentId: 'dest-123' },
+      });
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await transferPromise;
+      expect(result.result).toBe(TransactionResult.PENDING);
+      if (result.result === TransactionResult.PENDING) {
+        expect(result.data.transferId).toBe('txpendingabc123');
+      }
+    });
+
+    it('should send message without optional name field', async () => {
+      const mockResponse = {
+        action: ActionResponse.TRANSFER_MONEY_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          transferId: 'transfer-456',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const transferPromise = transferMoney({
+        amount: '2000',
+        currency: Currency.PEN,
+        paymentDestinationInformation: { paymentId: 'dest-456' },
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.TRANSFER_MONEY,
+          data: {
+            amount: '2000',
+            currency: Currency.PEN,
+            paymentDestinationInformation: { paymentId: 'dest-456' },
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await transferPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+      if (result.result === TransactionResult.SUCCESS) {
+        expect(result.data.transferId).toBe('transfer-456');
+      }
+    });
+  });
+
   describe('response handling edge cases', () => {
     it('should handle timeout for deposit', async () => {
       const depositPromise = deposit({
@@ -1248,6 +1570,21 @@ describe('Core SDK Functions', () => {
 
       await expect(depositPromise).rejects.toThrow(
         `Timeout, 60s passed waiting for ${ActionResponse.DEPOSIT_RESPONSE} response.`
+      );
+    });
+
+    it('should handle timeout for transferMoney', async () => {
+      const transferMoneyPromise = transferMoney({
+        amount: '100',
+        currency: Currency.ARS,
+        paymentDestinationInformation: { paymentId: 'dest-123' },
+      });
+
+      // Don't send response, let it timeout
+      jest.advanceTimersByTime(60000);
+
+      await expect(transferMoneyPromise).rejects.toThrow(
+        `Timeout, 60s passed waiting for ${ActionResponse.TRANSFER_MONEY_RESPONSE} response.`
       );
     });
 
