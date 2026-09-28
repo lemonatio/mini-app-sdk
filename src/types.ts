@@ -155,6 +155,12 @@ export enum ClaimKey {
   IS_PEP = 'IS_PEP',
   LEMONTAG = 'LEMONTAG',
   OPERATION_COUNTRY = 'OPERATION_COUNTRY',
+  /**
+   * Lemon user id. Only available for mini-apps built by Lemon: it is shared without user consent,
+   * and authenticate() returns FAILED for any other mini-app. The value is also signed in the SIWE
+   * message `resources` as `urn:lemon:user-id:<id>`; backends must read it from the verified message.
+   */
+  USER_ID = 'USER_ID',
 }
 
 export interface MiniAppGrantedClaim {
