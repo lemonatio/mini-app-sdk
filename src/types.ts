@@ -155,6 +155,7 @@ export enum ClaimKey {
   IS_PEP = 'IS_PEP',
   LEMONTAG = 'LEMONTAG',
   OPERATION_COUNTRY = 'OPERATION_COUNTRY',
+  USER_ID = 'USER_ID',
 }
 
 export interface MiniAppGrantedClaim {

@@ -1073,6 +1073,55 @@ describe('Core SDK Functions', () => {
       }
     });
 
+    it('should return the USER_ID claim when requested', async () => {
+      const mockResponse = {
+        action: ActionResponse.AUTHENTICATE_RESPONSE,
+        result: TransactionResult.SUCCESS,
+        data: {
+          wallet: '0x3A3399721eeC94E88EB1104325E46bf4BdA67366' as const,
+          grantedClaims: [{ key: ClaimKey.USER_ID, value: '12345' }],
+          signature: '0xSignature...' as const,
+          message: 'Sign in with Ethereum',
+        },
+      };
+
+      let messageHandler: MessageEventHandler;
+      mockAddEventListener.mockImplementation((event, handler) => {
+        if (event === 'message') {
+          messageHandler = handler as MessageEventHandler;
+        }
+      });
+
+      const authPromise = authenticate({
+        nonce: 'test1234',
+        chainId: ChainId.BASE_SEPOLIA,
+        requirements: { claims: [ClaimKey.USER_ID] },
+      });
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        stringifyMessage({
+          action: WebViewAction.AUTHENTICATE,
+          data: {
+            nonce: 'test1234',
+            chainId: ChainId.BASE_SEPOLIA,
+            requirements: { claims: [ClaimKey.USER_ID] },
+          },
+        })
+      );
+
+      setTimeout(() => {
+        messageHandler(new MessageEvent('message', { data: stringifyMessage(mockResponse) }));
+      }, 100);
+
+      jest.advanceTimersByTime(100);
+
+      const result = await authPromise;
+      expect(result.result).toBe(TransactionResult.SUCCESS);
+      if (result.result === TransactionResult.SUCCESS) {
+        expect(result.data.grantedClaims).toEqual([{ key: ClaimKey.USER_ID, value: '12345' }]);
+      }
+    });
+
     it('should send requirements with permissions in the authenticate message', async () => {
       const mockResponse = {
         action: ActionResponse.AUTHENTICATE_RESPONSE,
